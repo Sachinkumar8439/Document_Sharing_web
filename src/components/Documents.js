@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAppState } from "../Context/AppStateContext";
 import { formatBytes } from "./Profile";
 import {
-  FaFileAlt,
+  //  FaFileAlt,
   FaDownload,
   FaEdit,
   FaTrash,
@@ -11,6 +11,7 @@ import {
   FaDatabase,
   FaFolderOpen,
   FaShare,
+  FaGlobe,
   FaCopy,
 } from "react-icons/fa";
 import {
@@ -20,7 +21,7 @@ import {
   getFilePreview,
 } from "../configs/appwriteconfig";
 import { useAuthState } from "../Context/Authcontext";
-import { runhtml } from "../utility/util";
+import { runhtml,getFileIcon } from "../utility/util";
 
 export const formatDate = (isoDate) => {
   const date = new Date(isoDate);
@@ -50,9 +51,7 @@ export default function Documents() {
   }
 
   const handleOpenDocument = async (doc) => {
-    console.log(doc);
     const response = await getFilePreview(doc.id);
-    console.log(response);
     if (response.success) {
      if (doc.fileType === "text/html") {
          const res = await runhtml(response.url,doc)
@@ -80,9 +79,7 @@ export default function Documents() {
     }
 
     await setline(80, true);
-    // return;
     const response = await getFileDownload(id);
-    console.log(response);
     if (response.success) {
       const a = document.createElement("a");
       a.href = response.url;
@@ -103,11 +100,9 @@ export default function Documents() {
     if (!isconfirm) return;
     await setline(60, true);
     const response = await deleteFileForUser(doc.id);
-    console.log(response);
     if (response.success) {
       await setline(90, true);
       const result = await createHistoryEntry(doc, "Deleted");
-      console.log("result is ", result);
       if (result.success) {
         showToast.success(response.message);
       } else {
@@ -126,7 +121,6 @@ export default function Documents() {
     }
     await setline(80);
     const response = await getFilePreview(doc.id);
-    console.log(response);
     if (response.success) {
       const url = response.url;
       if (navigator.share) {
@@ -154,11 +148,9 @@ export default function Documents() {
   const filteredDocuments = files?.filter((doc) =>
     doc.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   const handlecopy = async (id)=>{
 
     const response = await getFilePreview(id);
-    console.log(response);
     if (response.success) {
       if(navigator.clipboard){
         await navigator.clipboard.writeText(response.url)
@@ -206,17 +198,19 @@ export default function Documents() {
         {filteredDocuments?.map((doc) => (
           <div key={doc.id} className="document-item">
             <div className="document-info">
-              <FaFileAlt className={`file-icon ${doc.fileType}`} />
+              {getFileIcon(doc.name, doc.fileType)}
               <div className="document-details">
                 <div className="document-name">{doc.name}</div>
                 <div className="document-meta">
                   <span className="document-date">
                     <FaCalendarAlt className="meta-icon" />
                     {formatDate(doc.uploadedAt)}
+                  <span style={{paddingLeft:"5px"}}>{doc.isPublic?<FaGlobe/>:""}</span>
                   </span>
                   <span className="document-size">
                     <FaDatabase className="meta-icon" />
                     {formatBytes(doc.fileSize)}
+                    
                   </span>
                 </div>
               </div>

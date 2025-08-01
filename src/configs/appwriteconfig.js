@@ -19,7 +19,6 @@ try {
 } catch (error) {
   
 }
-console.log("this is user id",userId)
 export const setuserId = async (userid)=>{
   userId = userid
 }

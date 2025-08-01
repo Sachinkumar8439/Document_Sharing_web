@@ -1,5 +1,4 @@
 const url = process.env.REACT_APP_APPWRITE_MAINFUNCTION_URL;
-console.log("this is function js")
 export const callAppwriteFunction = async (
   method = 'GET',
   body = null,

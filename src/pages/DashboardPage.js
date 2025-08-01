@@ -19,10 +19,11 @@ import Documents from "../components/Documents";
 import Settings from "../components/Settings";
 import { useAppState } from "../Context/AppStateContext";
 import { initStorageSystem ,listFilesForUser} from "../configs/appwriteconfig";
+import { checkfile } from "../utility/util";
 await initStorageSystem();
 
 const Dashboard = () => {
-  const { toast, setToast, showToast, showConfirmation,setfiles,setline ,sethistory} = useAppState();
+  const { toast, setToast,files, showToast, showConfirmation,setfiles,setline ,sethistory} = useAppState();
   const [page, setPage] = useState(localStorage.getItem("page") || "documents");
   const [isMobile, setIsMobile] = useState(false);
   const [isuploading, setisuploading] = useState(false);
@@ -52,10 +53,20 @@ const Dashboard = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUploadData({
-      ...uploadData,
+    
+     setUploadData((prev) => {
+    let updatedFile = prev.file;
+    if (prev.file) {
+      const ext = prev.file.name.split(".").pop(); 
+      updatedFile = new File([prev.file], `${value}.${ext}`, { type: prev.file.type });
+    }
+
+    return {
+      ...prev,
       [name]: value,
-    });
+      file: updatedFile,
+    };
+  });
   };
 
   const handleUserSearch = (e) => {
@@ -77,8 +88,17 @@ const Dashboard = () => {
   const handleUpload = async () => {
     if(isuploading) return;
     setisuploading(true);
-
-    console.log("uploaded data", uploadData.file);
+    if(uploadData.fileName.trim(" ") ===""){
+      showToast.error("File name should not be empty");
+      setisuploading(false)
+      return;
+    }
+    const isuniquefile = await checkfile(files,uploadData);
+    if(!isuniquefile){
+       showToast.error("file name allready exists");
+       setisuploading(false)
+       return
+    }
     if (!uploadData.file) {
       showToast.error("file not selected");
       return;
@@ -94,9 +114,7 @@ const Dashboard = () => {
       const newfile = response.newfile;
       await setline(90,true)
       const result = await createHistoryEntry({id:newfile.id,name:newfile.name,fileType:newfile.fileType,fileSize:newfile.fileSize,uploadedAt:newfile.uploadedAt,userId:newfile.userId})
-      console.log("creating history result",result)
       showToast.success("Docuemnt Uploaded Successfully");
-      console.log(response);
       const formatehistory = await formatHistoryData(newfile);
       setfiles((prev) => [response.newfile,...prev]);
       sethistory((prev) => [formatehistory,...prev]);
@@ -129,14 +147,12 @@ const Dashboard = () => {
      if(response.success)
       {
        setfiles(response.files);
-       console.log(response);
      }
      else{
       showToast.error(response.message);
      }
      await setline(90,true)
     const result = await gethistory();
-    console.log(result);
      if(result.success)
      {
       sethistory(result.history);
@@ -164,7 +180,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(()=>{
-    if(page!=="setings")
+    if(page!=="setings" || page !=="history")
     {
       localStorage.setItem("page",page);
     }
@@ -243,9 +259,10 @@ const Dashboard = () => {
                 <input
                   type="text"
                   name="fileName"
-                  value={uploadData.fileName}
+                  value={uploadData.fileName?.split(".")[0]}
                   onChange={handleInputChange}
                   placeholder="Enter file name"
+                  required
                 />
               </div>
 

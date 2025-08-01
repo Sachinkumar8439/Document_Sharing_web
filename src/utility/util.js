@@ -1,4 +1,14 @@
-
+import {
+   FaFileAlt,
+  FaFilePdf,
+  FaFileImage,
+  FaFileWord,
+  FaFileExcel,
+  FaFileCode,
+  FaFileVideo,
+  FaFileArchive,
+  FaFile,
+} from "react-icons/fa";
 export const runhtml= async(url,doc)=>{
      if(!url)return {success:false,message:"url missing"}
       try {
@@ -25,4 +35,29 @@ export const runhtml= async(url,doc)=>{
       console.error("Error rendering HTML:", err);
       return {success:false,message:err.message}
     }
+}
+
+ export const getFileIcon = (fileName, fileType) => {
+  const ext = fileName?.split(".").pop().toLowerCase();
+
+  if (fileType.includes("pdf") || ext === "pdf") return <FaFilePdf color="red" />;
+  if (fileType.includes("image") || ["jpg", "jpeg", "png", "gif"].includes(ext))
+    return <FaFileImage color="green" />;
+  if (["doc", "docx"].includes(ext)) return <FaFileWord color="blue" />;
+  if (["xls", "xlsx"].includes(ext)) return <FaFileExcel color="green" />;
+  if (["zip", "rar"].includes(ext)) return <FaFileArchive color="orange" />;
+  if (["mp4", "mkv", "avi"].includes(ext)) return <FaFileVideo color="purple" />;
+  if (["js", "html", "css", "java", "cpp", "py"].includes(ext))
+    return <FaFileCode color="teal" />;
+  if (["txt", "md"].includes(ext)) return <FaFileAlt color="gray" />;
+
+  return <FaFile color="black" />;
+};
+
+
+export const checkfile = async(files ,data)=>{
+     if(files.length <=0){
+      return true;
+     }
+     return !files.some((f) => f.name === data.file.name);
 }

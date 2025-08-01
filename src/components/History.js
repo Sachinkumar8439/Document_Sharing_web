@@ -1,6 +1,9 @@
 import React from "react";
-import { FaFileAlt, FaClock, FaCalendarAlt, FaDatabase } from "react-icons/fa";
+import {FaCalendarAlt ,
+
+} from "react-icons/fa";
 import { useAppState } from "../Context/AppStateContext";
+import { getFileIcon } from "../utility/util";
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp);
@@ -20,10 +23,11 @@ const formatTime = (timestamp) => {
   });
 };
 
-const getFileTypeIcon = (fileType) => {
-  // You can map specific icons per type if needed
-  return <FaFileAlt className={`file-icon ${fileType}`} />;
-};
+
+// const getFileTypeIcon = (fileType) => {
+//   // You can map specific icons per type if needed
+//   return <FaFileAlt className={`file-icon ${fileType}`} />;
+// };
 
 const History = () => {
   const { history } = useAppState();
@@ -35,14 +39,21 @@ const History = () => {
 
       <div className="documents-list">
         {!history && (
-          <div style={{ flex: "1", margin: "auto", padding: "10px", borderRadius: "10px" }}>
+          <div
+            style={{
+              flex: "1",
+              margin: "auto",
+              padding: "10px",
+              borderRadius: "10px",
+            }}
+          >
             Loading history...
           </div>
         )}
         {history?.map((item) => (
           <div key={item.id} className="document-item">
             <div className="document-info">
-              {getFileTypeIcon(item.fileType)}
+              {getFileIcon(item.name, item.fileType)}
               <div className="document-details">
                 <div className="document-name">{item.name}</div>
                 <div className="document-meta">
@@ -50,7 +61,7 @@ const History = () => {
                     <FaCalendarAlt className="meta-icon" />
                     {formatDate(item.timestamp)} at {formatTime(item.timestamp)}
                   </span>
-                  <span  className="document-size">
+                  <span className="document-size">
                     {/* <FaClock className="meta-icon" /> */}
                     {item.action}
                   </span>

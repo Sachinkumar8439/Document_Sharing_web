@@ -3,7 +3,6 @@ import { appwriteAuth } from "../Auth/appwriteauth";
 import setRoutes from "../configs/routconfig";
 const AuthContext = createContext();
  const response = await appwriteAuth.getUser();
- console.log(response);
     if(response.success)
       {
         response.user.name = response.user.name?.trim() === "" ? response.user.email.split("@")[0] : response.user.name;
