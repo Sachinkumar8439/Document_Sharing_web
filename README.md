@@ -1,12 +1,22 @@
 # Document Sharing Web Application
 
+# 1. Landing page
 ![App Screenshot](images/landingpage.JPG)
+# 2. creating Account
 ![App Screenshot](images/accountcreation.JPG)
+# 3. email verification page
 ![App Screenshot](images/emailverification.JPG)
+# 4. profile view
 ![App Screenshot](images/profile.JPG)
+# 5. file uploading form
 ![App Screenshot](images/uploadform.JPG)
+# 6. when uploading
 ![App Screenshot](images/uploading.JPG)
+# 7. after uploading docuement section
 ![App Screenshot](images/document.JPG)
+# 8. operations
+![App Screenshot](images/operations.JPG)
+# 9. settings
 ![App Screenshot](images/settings.JPG)
 
 A secure, responsive document sharing platform with user authentication, file management, and sharing capabilities. Built with React.js and Appwrite backend.
