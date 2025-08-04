@@ -499,6 +499,7 @@
 }
 
 .profile-header {
+  /* background-color: red; */
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
@@ -508,6 +509,7 @@
 }
 
 .avatar-container {
+  /* background-color: red; */
   position: relative;
   width: 100px;
   height: 100px;
@@ -677,8 +679,8 @@
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-/* Stats Section */
 .stats-section {
+  /* background-color:red; */
   margin-top: 30px;
 }
 
@@ -714,7 +716,6 @@
   font-size: 0.9rem;
 }
 
-/* File Type Stats */
 .file-type-stats h5 {
   margin: 20px 0 15px;
   color: var(--text-secondary);
@@ -774,14 +775,15 @@
 /* Responsive Adjustments */
 @media (max-width: 600px) {
   .profile-header {
-    flex-direction: column;
-    text-align: center;
+    /* flex-direction: column; */
+    /* text-align: center; */
   }
   
   .avatar-container {
     margin: 0 auto;
   }
   .profile-card{
+    /* background-color: black; */
     /* overflow: */
   }
   .profile-info {
@@ -799,8 +801,22 @@
   }
   
   .stats-grid {
-    grid-template-columns: 1fr;
+    /* grid-template-columns: 1fr; */
   }
+  .stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 15px;
+}
+  .stat-card {
+  padding: 15px;
+}
+
+.stat-value {
+  font-size: 1rem;
+}
+.stat-label {
+  font-size: 0.6rem;
+}
 }
 /* Upload Popup Styles */
 .upload-popup-overlay {
