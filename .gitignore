@@ -5,4 +5,4 @@
 /backendfunctions/mainfunction/node_modules/
 
 # Ignore all .env files (in root or subfolders)
-env
+/.env/

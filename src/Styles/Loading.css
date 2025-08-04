@@ -41,7 +41,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: var(--primary);
+  background-color: white;
   animation: pulse 1.5s infinite ease-in-out;
 }
 

@@ -1,7 +1,7 @@
 {
   "short_name": "DocStore",
-  "name": "DocStore - Secure Document Storage",
-  "description": "Store and share your documents securely",
+  "name": "DocStore - Store Importants",
+  "description": "Store Docuement securely",
   "icons": [
     {
       "src": "Favicon.jpeg",
@@ -18,6 +18,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117"
+  "background_color": "#ffffff",
+  "theme_color": "#0A3D62"
 }
