@@ -10,33 +10,81 @@ const BASE_URL = `https://${domain}`;
 console.log("this is base url",BASE_URL);
 
 export const appwriteAuth = {
-  async signUp(email, password) {
-    try {
-      const user = await account.create(ID.unique(), email, password);
-      console.log("User created:", user);
 
-      await account.createEmailPasswordSession(email, password);
+async sendemailverification(email, password) {
+  try {
+    await account.createEmailPasswordSession(email, password);
+    await account.createVerification(`${BASE_URL}/verify`);
 
-      await account.createVerification(`${BASE_URL}/verify`);
+    return {
+      success: true,
+      message: "A verification link has been sent to your email address.",
+    };
+  } catch (error) {
+    console.error("Verification error:", error);
 
-        await account.deleteSession("current");
+    let friendlyMessage = error.message;
 
+    if (error.code === 401) {
+      friendlyMessage = "Invalid credentials. Please check your email and password.";
+    } else if (error.code === 403) {
+      friendlyMessage = "This email cannot be verified right now. Try again later.";
+    } else if (error.code === 429) {
+      friendlyMessage = "Too many verification attempts. Please wait a moment and try again.";
+    }
+    else if (error.code === 409) {
+      friendlyMessage = "allready verified if you lost password then reset it";
+    }
 
+    return { success: false, message: friendlyMessage };
+  } finally {
+    await account.deleteSession("current").catch(err =>
+      console.log("Session cleanup skipped:", err.message)
+    );
+  }
+},
+
+async signUp(email, password) {
+  try {
+    const user = await account.create(ID.unique(), email, password);
+    console.log("User created:", user);
+
+    const res = await this.sendemailverification(email, password);
+
+    if (res.success) {
       return {
         success: true,
-        message: "Verification email sent. Please check your inbox.",
+        message: "Account created successfully! Please check inbox & verify your email to continue.",
       };
-    } catch (error) {
-      await account.deleteSession("current");
-      console.error("Signup error:", error);
-      return { success: false, message: error.message };
+    } else {
+      return { success: false, message: res.message };
     }
-  },
+  } catch (error) {
+    console.error("Signup error:", error);
+
+    let friendlyMessage = "Something went wrong. Please reload and try again later.";
+
+    if (error.code === 409) {
+      friendlyMessage = "This email is already registered. If unverified, please check your inbox.";
+    } else if (error.code === 400) {
+      friendlyMessage = error.message;
+    } else if (error.code === 422) {
+      friendlyMessage = "Password too weak. Use at least 8 characters, including numbers and symbols.";
+    } else if (error.code === 401) {
+      friendlyMessage = "Unauthorized request. Please try again.";
+    } else if (error.code === 429) {
+      friendlyMessage = "Too many signup attempts. Please wait and try again.";
+    }
+
+    return { success: false, message: friendlyMessage ,code:error.code };
+  }
+}
+
+,
 
   async login(email, password) {
     try {
-      const session = await account.createEmailPasswordSession(email, password);
-      console.log("this is sesssion ",session);
+       await account.createEmailPasswordSession(email, password);
       const user = await account.get();
 
       if (!user.emailVerification) {

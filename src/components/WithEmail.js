@@ -42,10 +42,11 @@ const SignupForm = () => {
      await setline(90,true)
       if(result.success)
         {
+          setError("if mail not arrived in 1min you can send verification again by intering correct email and password and click sendverification below")
         showToast.success(result.message);
       }
       else
-      {
+      { 
         showToast.error(result.message);
       }
     } catch (err) {
@@ -110,6 +111,7 @@ const SignupForm = () => {
             <p className="text-muted mt-3">
               Use 8 or more characters with a mix of letters, numbers & symbols
             </p>
+            
           </div>
           
 
@@ -130,6 +132,22 @@ const SignupForm = () => {
               <Link to="/signin" className="link">
                 Sign in
               </Link>
+            </p>
+            <p className="text-muted">
+              remain unverified email?{' '}
+              <button style={{background:"none"}} className="link" onClick={async (e)=>{
+                e.preventDefault();
+                if(formData.email.trim() ==="" ||formData.password.trim() === ""){
+                  showToast.error("Enter details to sending verification (email & password)");
+                  return;
+                }
+                const res = await  appwriteAuth.sendemailverification(formData.email,formData.password)
+                if(res.success){
+                  showToast.success(res.message);
+                  return;
+                }
+                showToast.error(res.message);
+              }}>send verification</button>
             </p>
           </div>
         </form>
