@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./dashboard.css";
-import { createHistoryEntry, formatHistoryData, gethistory, uploadFileForUser } from "../configs/appwriteconfig";
+import { createHistoryEntry, gethistory, uploadFileForUser } from "../configs/appwriteconfig";
 import {
   FaUser,
   FaFileAlt,
@@ -23,7 +23,7 @@ import { checkfile } from "../utility/util";
 await initStorageSystem();
 
 const Dashboard = () => {
-  const { toast, setToast,files, showToast, showConfirmation,setfiles,setline ,sethistory} = useAppState();
+  const { files, showToast,setfiles,setline ,sethistory} = useAppState();
   const [page, setPage] = useState(localStorage.getItem("page") || "documents");
   const [isMobile, setIsMobile] = useState(false);
   const [isuploading, setisuploading] = useState(false);
@@ -37,7 +37,7 @@ const Dashboard = () => {
     isPublic: false,
   });
   const [userSearch, setUserSearch] = useState("");
-  const [availableUsers, setAvailableUsers] = useState([
+  const [availableUsers] = useState([
     { id: 1, name: "Alice Johnson", email: "alice@example.com" },
     { id: 2, name: "Bob Smith", email: "bob@example.com" },
     { id: 3, name: "Charlie Brown", email: "charlie@example.com" },
@@ -113,11 +113,11 @@ const Dashboard = () => {
     else{
       const newfile = response.newfile;
       await setline(90,true)
-      const result = await createHistoryEntry({id:newfile.id,name:newfile.name,fileType:newfile.fileType,fileSize:newfile.fileSize,uploadedAt:newfile.uploadedAt,userId:newfile.userId})
+      await createHistoryEntry({id:newfile.id,name:newfile.name,fileType:newfile.fileType,fileSize:newfile.fileSize,uploadedAt:newfile.uploadedAt,userId:newfile.userId})
       showToast.success("Docuemnt Uploaded Successfully");
-      const formatehistory = await formatHistoryData(newfile);
+      // const formatehistory = await formatHistoryData(newfile);
       setfiles((prev) => [response.newfile,...prev]);
-      sethistory((prev) => [formatehistory,...prev]);
+      // sethistory((prev) => [formatehistory,...prev]);
       setShowUploadPopup(false);
       setUploadData({
         fileName: "",
