@@ -148,7 +148,7 @@ async signUp(email, password) {
       const user = await account.get();
       return { success: true, user,message:"Welcome back !" };
     } catch (error) {
-      return { success: false, user: null , message:error.message };
+      return { success: false, user: null , message:error.message,error };
     }
   },
   

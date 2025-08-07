@@ -22,15 +22,18 @@ export const AuthProvider = ({ children }) => {
         const r =  await setRoutes(USER);
         setroutes(r);
          setuser(USER);
+         if(USER){
+          setloading(false)
+         }
          
         
          
   }
-  useEffect(()=>{
-     if(user){
-      setloading(false);
-     }
-  },[user])
+  // useEffect(()=>{
+  //   //  if(user){
+  //   //   setloading(false);
+  //   //  }
+  // },[user])
 
   const loaduser = async ()=>{
           const response = await appwriteAuth.getUser();
@@ -40,10 +43,16 @@ export const AuthProvider = ({ children }) => {
         updateuser(response.user);
         
       } else{
-        if(!alerted){
-          showToast.error("some think went wrong check internet connection")
-          setalerted(true);
+        if(response.error.code === 401){
+           setalerted(false);
+           setloading(false)
+        }else{
 
+          if(!alerted){
+            showToast.error("some think went wrong check internet connection")
+            setalerted(true);
+            
+          }
         }
         
       }
@@ -55,7 +64,6 @@ useEffect(() => {
   }
   const interval = setInterval(() => {
     if (!loading) {
-      showToast.success("Running All Perfect !");
       clearInterval(interval);  
       setalerted(false);
     } else {
