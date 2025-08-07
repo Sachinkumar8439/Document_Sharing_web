@@ -128,7 +128,6 @@ export const AppStateProvider = ({ children }) => {
     files,
     line,
     history,
-    
     setline,
     setIsMobile,
     sethistory,

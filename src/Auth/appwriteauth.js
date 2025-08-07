@@ -3,8 +3,13 @@ import { Client, Account, ID } from "appwrite";
 export const client = new Client()
   .setEndpoint(process.env.REACT_APP_APPWRITE_ENDPOINT)
   .setProject(process.env.REACT_APP_APPWRITE_PROJECT_ID);
-
-const account = new Account(client);
+  let account
+try {
+   account = new Account(client);
+  
+} catch (error) {
+    // console.log(error)
+}
 const domain = process.env.REACT_APP_VERCEL_PROJECT_PRODUCTION_URL || "localhost:3000"
 const BASE_URL = `https://${domain}`;
 console.log("this is base url",BASE_URL);

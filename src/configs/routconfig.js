@@ -41,7 +41,7 @@ const setRoutes = async (user)=>{
     {
         path: "/reset-password",
         component: ResetPasswordForm,
-        isvalid: user ? false:true,
+        isvalid: true,
         direct:"/" 
     },
     

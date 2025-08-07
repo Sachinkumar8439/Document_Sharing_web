@@ -51,7 +51,7 @@ const ResetPasswordForm = () => {
       showToast.error("Invalid Link for resetting password");
       setError("This link is not valid. It's structured incorrectly.");
     }
-  }, [userId, secret, showToast]);
+  }, [userId, secret]);
 
   return (
     <div className="reset-password-container">
