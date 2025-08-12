@@ -42,7 +42,7 @@ export const initStorageSystem = async () => {
   }
 };
 
-export const uploadFileForUser = async (file, permissionSettings = {}) => {
+export const uploadFileForUser = async (file, permissionSettings = {},setline) => {
   try {
     if (!userId) throw new Error("User not authenticated");
 
@@ -60,7 +60,12 @@ export const uploadFileForUser = async (file, permissionSettings = {}) => {
       bucketId,
       ID.unique(),
       file,
-      permissions
+      permissions,
+      (uploadProgress) => {
+      const percent = parseFloat(uploadProgress.progress.toFixed(2));
+      const adjusted = (percent / 100) * 98;
+      setline(adjusted.toFixed(2));
+      }
     );
 
     const passwordHash = permissionSettings.password 

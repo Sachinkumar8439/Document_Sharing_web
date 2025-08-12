@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./dashboard.css";
-import { createHistoryEntry, gethistory, uploadFileForUser } from "../configs/appwriteconfig";
+import { createHistoryEntry, getFilePreview, gethistory, uploadFileForUser } from "../configs/appwriteconfig";
 import {
   FaUser,
   FaFileAlt,
@@ -16,14 +16,14 @@ import {
 import Profile from "../components/Profile";
 import History from "../components/History";
 import Documents from "../components/Documents";
-import Settings from "../components/Settings";
+import Settings, { bytesToMB } from "../components/Settings";
 import { useAppState } from "../Context/AppStateContext";
 import { initStorageSystem ,listFilesForUser} from "../configs/appwriteconfig";
 import { checkfile } from "../utility/util";
 await initStorageSystem();
 
 const Dashboard = () => {
-  const { files, showToast,setfiles,setline ,sethistory} = useAppState();
+  const { files, showToast,setfiles,setline ,sethistory,storage,setstorage,line,setprifileimageurl} = useAppState();
   const [page, setPage] = useState(localStorage.getItem("page") || "documents");
   const [isMobile, setIsMobile] = useState(false);
   const [isuploading, setisuploading] = useState(false);
@@ -87,6 +87,11 @@ const Dashboard = () => {
 
   const handleUpload = async () => {
     if(isuploading) return;
+    console.log(uploadData.file);
+    if(bytesToMB(uploadData.file.size + storage) -50>0){
+      showToast.error(`Limit exceed [ ${50 - bytesToMB(storage)}MB Available and your file size is ${bytesToMB(uploadData.file.size)}MB ]`)
+      return
+    }
     setisuploading(true);
     if(uploadData.fileName.trim(" ") ===""){
       showToast.error("File name should not be empty");
@@ -103,10 +108,10 @@ const Dashboard = () => {
       showToast.error("file not selected");
       return;
     }
-    await setline(70);
+    if(uploadData.file.size < 5242880) await setline(70);
     try {
       
-      const response = await uploadFileForUser(uploadData.file,{isPublic:uploadData.isPublic,allowedUsers:uploadData.allowedUsers,password:uploadData.filePassword});
+      const response = await uploadFileForUser(uploadData.file,{isPublic:uploadData.isPublic,allowedUsers:uploadData.allowedUsers,password:uploadData.filePassword},setline);
       if (!response.success) {
       showToast.error(response.message);
     }
@@ -164,6 +169,32 @@ const Dashboard = () => {
       await setline(0)
      
   }
+  const fetchprofileimage = async(id)=>{
+      const response = await getFilePreview(id)
+      if(response.success){
+        localStorage.setItem("profileimage",response.url)
+        setprifileimageurl(response.url)
+      }
+  }
+
+  useEffect(()=>{
+    let isprofileimage = false;
+    let total = 0;
+    files?.forEach((element) => {
+      if(element.name === "__profile.jpg"){
+           isprofileimage = true;
+           fetchprofileimage(element.id)
+      }
+      if(!isprofileimage)
+        {
+          setprifileimageurl(null)
+          localStorage.removeItem("profileimage")
+        }
+      total = total + element.fileSize;
+    });
+    setstorage(total);
+ 
+  },[files,setstorage])
 
   useEffect(() => {
     perfomrminitials();
@@ -377,7 +408,7 @@ const Dashboard = () => {
                 onClick={handleUpload}
                disabled={!uploadData.file || isuploading}
               >
-                <FaUpload />{isuploading?"Uploading ...":"Upload Now"}
+                <FaUpload />{isuploading?`Uploading ... (${line.value}%)`:"Upload Now"}
               </button>
             </div>
           </div>

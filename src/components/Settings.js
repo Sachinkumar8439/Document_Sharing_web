@@ -28,12 +28,16 @@ import { useAuthState } from "../Context/Authcontext";
 import { useAppState } from "../Context/AppStateContext";
 import { updatePassword } from "../configs/appwriteconfig";
 import UserSessionsModal from "./Sessions";
+export function bytesToMB(bytes) {
+    const mb = bytes / (1024 * 1024);
+    return mb.toFixed(2); 
+}
 
 const Settings = () => {
   const [isshowsession,setisshowsession] = useState(false);
   const [passtate,setpasstate] = useState(-1);
   const [password,setpassword] = useState("")
-  const { showConfirmation,showToast,setline } = useAppState();
+  const { showConfirmation,showToast,setline,storage } = useAppState();
   const { updateuser, user,sessions } = useAuthState();
   const navigate = useNavigate();
 
@@ -299,10 +303,10 @@ const isconfirm = await showConfirmation(
           <div className="category-content">
             <div className="storage-info">
               <div className="storage-progress">
-                <div className="progress-bar" style={{ width: "65%" }}></div>
+                <div className="progress-bar" style={{ width: `${(bytesToMB(storage)/50)*100}%` }}></div>
               </div>
               <div className="storage-details">
-                <span>13.2 GB of 20 GB used</span>
+                <span>{bytesToMB(storage)}MB of 50 MB used [ {(bytesToMB(storage)/50)*100}% ]</span>
                 <button className="upgrade-btn">
                   <FaArrowUp /> Upgrade
                 </button>

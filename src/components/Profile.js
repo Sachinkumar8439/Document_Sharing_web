@@ -24,17 +24,10 @@ export const formatBytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 const Profile = () => {
-  const { showToast, documents, files, setline } = useAppState();
-  const [storage, setstorage] = useState();
+  const { showToast, documents, files, setline,storage,setstorage,profileimageurl } = useAppState();
   const { user, setuser } = useAuthState();
 
-  useEffect(() => {
-    let total = 0;
-    files?.forEach((element) => {
-      total = total + element.fileSize;
-    });
-    setstorage(total);
-  }, [files]);
+ 
 
   // const [user, setUser] = useState({
   //   name: "John Doe",
@@ -55,6 +48,7 @@ const Profile = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [name, setname] = useState(user?.name || "UnNamedUser");
+  const [file,setfile] = useState(null);
   const formatDate = (date) => {
     return date.toLocaleDateString("en-US", {
       month: "short",
@@ -71,6 +65,7 @@ const Profile = () => {
   // };
   const handleSaveProfile = async (e) => {
     e.preventDefault();
+
     if (name === user.name) {
       setIsEditing(false);
       return;
@@ -98,12 +93,15 @@ const Profile = () => {
       <div className="profile-card">
         <div className="profile-header">
           <div className="avatar-container">
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt="User Avatar" className="avatar" />
+            {profileimageurl ? (
+              <img src={profileimageurl} alt="User Avatar" className="avatar" />
             ) : (
               <FaUserCircle className="avatar-default" />
             )}
-            <button className="edit-avatar-btn" title="Change photo">
+            <button onClick={(e)=>{
+              e.preventDefault()
+              showToast.success("Just Upload __profile.jpg file by + button in right bottom corner",10000)
+            }} title="want to add new profile image just upload __profile.jpg file or image by + button" className="edit-avatar-btn">
               <FaCamera />
             </button>
           </div>

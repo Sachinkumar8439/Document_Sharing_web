@@ -8,7 +8,9 @@ export const AppStateProvider = ({ children }) => {
   const [currentPage, setCurrentPage] = useState('history');
   const [line,setprogress] = useState({value:0,fast:false});
   const [files,setfiles] = useState([]);
+  const [profileimageurl,setprifileimageurl] = useState(localStorage.getItem("profileimage") || null);
   const [history,sethistory] = useState([]);
+  const [storage,setstorage] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
    const [confirmationState, setConfirmationState] = useState({
     show: false,
@@ -128,6 +130,9 @@ export const AppStateProvider = ({ children }) => {
     files,
     line,
     history,
+    storage,
+    profileimageurl,
+    setprifileimageurl,
     setline,
     setIsMobile,
     sethistory,
@@ -137,6 +142,7 @@ export const AppStateProvider = ({ children }) => {
     setShowUploadPopup,
     setUploadData,
     setToast,
+    setstorage,
     
     formatDate,
     formatTime,
