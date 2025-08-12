@@ -151,8 +151,25 @@ async signUp(email, password) {
       return { success: false, user: null , message:error.message,error };
     }
   },
-  
+  async getUserSessions(){
+  try {
+    const sessions = await account.listSessions();
+    return {success:true,message:"sessions fetched successfully",sessions};
+  } catch (error) {
+    console.error("Error getting sessions:", error);
+    return {success:false,message:error.message}
+  }
+},
+ async deleteSession(sessionId) {
+  try {
+    await account.deleteSession(sessionId);
+    console.log(`Session ${sessionId} deleted`);
+    return{success:true,message:"Session Deleted Successfully"}
+  } catch (error) {
+    console.error("Error deleting session:", error);
+    return {success:false,message:error.message}
+  }
+}
 
-  
 };
 

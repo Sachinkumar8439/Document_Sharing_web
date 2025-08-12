@@ -10,6 +10,7 @@ const AuthContext = createContext();
 
    
 export const AuthProvider = ({ children }) => {
+    const [sessions,setsessions] = useState([])
     const {toast,setToast,line} = useAppState()
   const {showToast} = useAppState()
     const [loading,setloading] = useState(true);
@@ -41,6 +42,8 @@ export const AuthProvider = ({ children }) => {
       {
         response.user.name = response.user.name?.trim() === "" ? response.user.email.split("@")[0] : response.user.name;
         updateuser(response.user);
+        const res = await appwriteAuth.getUserSessions();
+        setsessions(res.sessions);
         
       } else{
         if(response.error.code === 401){
@@ -79,6 +82,8 @@ useEffect(() => {
   const value = {
     user,
     routes,
+    sessions,
+    setsessions,
     setuser,
     setroutes,
     updateuser,

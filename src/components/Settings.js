@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import setRoutes from "../configs/routconfig";
 import { appwriteAuth } from "../Auth/appwriteauth";
 import { callAppwriteFunction } from "../API/functioncall";
 import {
@@ -28,12 +27,14 @@ import {
 import { useAuthState } from "../Context/Authcontext";
 import { useAppState } from "../Context/AppStateContext";
 import { updatePassword } from "../configs/appwriteconfig";
+import UserSessionsModal from "./Sessions";
 
 const Settings = () => {
+  const [isshowsession,setisshowsession] = useState(false);
   const [passtate,setpasstate] = useState(-1);
   const [password,setpassword] = useState("")
   const { showConfirmation,showToast,setline } = useAppState();
-  const { updateuser, user} = useAuthState();
+  const { updateuser, user,sessions } = useAuthState();
   const navigate = useNavigate();
 
   const logout = async (e) => {
@@ -149,13 +150,13 @@ const isconfirm = await showConfirmation(
 
   return (
     <div className="settings-container">
+      {isshowsession && <UserSessionsModal onClose={()=>setisshowsession(false)}/>}
       <h2>Settings</h2>
       <p className="settings-subtitle">
         Configure your application preferences
       </p>
 
       <div  className="settings-categories">
-        {/* Account Settings */}
         <div className="settings-category">
           <div className="category-header">
             <FaUserCog className="category-icon" />
@@ -196,7 +197,6 @@ const isconfirm = await showConfirmation(
           </div>
         </div>
 
-        {/* Privacy Settings */}
         <div className="settings-category">
           <div className="category-header">
             <FaShieldAlt className="category-icon" />
@@ -217,7 +217,23 @@ const isconfirm = await showConfirmation(
                 <span className="slider"></span>
               </label>
             </div>
-
+            <div className="setting-item">
+              <div className="setting-info">
+                <FaUser className="setting-icon" />
+                <div>
+                  <h4>Sessions</h4>
+                  <p>manage where you logged in</p>
+                </div>
+              </div>
+              <div className="theme-options">
+                <button onClick={()=>setisshowsession(true)} className="theme-option dark active">
+                  <FaSun /> Manage
+                </button>
+                <button  className="theme-option light">
+                  {sessions.total} Active
+                </button>
+              </div>
+            </div>
             <div className="setting-item">
               <div className="setting-info">
                 <FaTrash className="setting-icon" />
@@ -233,7 +249,6 @@ const isconfirm = await showConfirmation(
           </div>
         </div>
 
-        {/* Application Preferences */}
         <div className="settings-category">
           <div className="category-header">
             <FaSlidersH className="category-icon" />
@@ -276,7 +291,6 @@ const isconfirm = await showConfirmation(
           </div>
         </div>
 
-        {/* Storage Settings */}
         <div className="settings-category">
           <div className="category-header">
             <FaDatabase className="category-icon" />
