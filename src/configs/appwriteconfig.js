@@ -51,7 +51,6 @@ export const uploadFileForUser = async (file, permissionSettings = {},setline) =
       Permission.write(Role.user(userId)),
       ...(permissionSettings.allowedUsers?.map(u => Permission.read(Role.user(u))) || [])
     ];
-    console.log("is public",permissionSettings.isPublic);
     if (permissionSettings.isPublic) {
   permissions.push(Permission.read(Role.any()));
      }
@@ -64,7 +63,7 @@ export const uploadFileForUser = async (file, permissionSettings = {},setline) =
       (uploadProgress) => {
       const percent = parseFloat(uploadProgress.progress.toFixed(2));
       const adjusted = (percent / 100) * 98;
-      setline(adjusted.toFixed(2));
+      setline(adjusted.toFixed(0));
       }
     );
 

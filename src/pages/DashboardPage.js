@@ -20,14 +20,17 @@ import Settings, { bytesToMB } from "../components/Settings";
 import { useAppState } from "../Context/AppStateContext";
 import { initStorageSystem ,listFilesForUser} from "../configs/appwriteconfig";
 import { checkfile } from "../utility/util";
+import { appwriteAuth } from "../Auth/appwriteauth";
+import { useAuthState } from "../Context/Authcontext";
 await initStorageSystem();
 
 const Dashboard = () => {
-  const { files, showToast,setfiles,setline ,sethistory,storage,setstorage,line,setprifileimageurl} = useAppState();
+  const { files, showToast,setfiles,setline ,sethistory,storage,setstorage,line,setprofileimageurl,profileimageurl} = useAppState();
   const [page, setPage] = useState(localStorage.getItem("page") || "documents");
   const [isMobile, setIsMobile] = useState(false);
   const [isuploading, setisuploading] = useState(false);
   const [showUploadPopup, setShowUploadPopup] = useState(false);
+  const {setsessions} = useAuthState();
 
   const [uploadData, setUploadData] = useState({
     fileName: "",
@@ -87,7 +90,6 @@ const Dashboard = () => {
 
   const handleUpload = async () => {
     if(isuploading) return;
-    console.log(uploadData.file);
     if(bytesToMB(uploadData.file.size + storage) -50>0){
       showToast.error(`Limit exceed [ ${50 - bytesToMB(storage)}MB Available and your file size is ${bytesToMB(uploadData.file.size)}MB ]`)
       return
@@ -117,7 +119,7 @@ const Dashboard = () => {
     }
     else{
       const newfile = response.newfile;
-      await setline(90,true)
+      await setline(98,true)
       await createHistoryEntry({id:newfile.id,name:newfile.name,fileType:newfile.fileType,fileSize:newfile.fileSize,uploadedAt:newfile.uploadedAt,userId:newfile.userId})
       showToast.success("Docuemnt Uploaded Successfully");
       // const formatehistory = await formatHistoryData(newfile);
@@ -166,35 +168,41 @@ const Dashboard = () => {
 
        showToast.error(result.message);
       }
+
       await setline(0)
+      const res = await appwriteAuth.getUserSessions();
+      if(res.success){
+        setsessions(res.sessions);
+      }
      
   }
-  const fetchprofileimage = async(id)=>{
-      const response = await getFilePreview(id)
-      if(response.success){
-        localStorage.setItem("profileimage",response.url)
-        setprifileimageurl(response.url)
-      }
-  }
-
+  
   useEffect(()=>{
+    const fetchprofileimage = async(id)=>{
+        const response = await getFilePreview(id)
+        if(response.success){
+          localStorage.setItem("profileimage",response.url)
+          setprofileimageurl(response.url)
+        }
+    }
     let isprofileimage = false;
-    let total = 0;
-    files?.forEach((element) => {
+    let storageused = 0;
+    files.forEach((element) => {
       if(element.name === "__profile.jpg"){
-           isprofileimage = true;
-           fetchprofileimage(element.id)
+        isprofileimage = true;
+        fetchprofileimage(element.id)
       }
-      if(!isprofileimage)
+      
+      storageused += element.fileSize;
+    });
+    if(!isprofileimage)
         {
-          setprifileimageurl(null)
+          setprofileimageurl(null)
           localStorage.removeItem("profileimage")
         }
-      total = total + element.fileSize;
-    });
-    setstorage(total);
- 
-  },[files,setstorage])
+    setstorage(storageused);
+
+  },[files,setstorage,setprofileimageurl])
 
   useEffect(() => {
     perfomrminitials();

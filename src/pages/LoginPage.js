@@ -12,7 +12,7 @@ const LoginForm = () => {
   const [email,setemail] = useState("")
   const [password,setpassword] = useState("")
   const {showToast,setline} = useAppState()
-  const {updateuser} = useAuthState();
+  const {updateuser,setsessions} = useAuthState();
   const [showPassword, setShowPassword] = useState(false);
   const [islogingin,setislogingin] = useState(false)
   const [isforget,setisforget] = useState(false);
@@ -47,9 +47,10 @@ const LoginForm = () => {
       if(response.success)
       {
         response.user.name = response.user.name?.trim() === "" ? (await updateName(response.user.email.split("@")[0])).data.name : response.user.name;
-         await setuserId(response.user.$id)
+       await setuserId(response.user.$id)
        await updateuser(response.user);
        await setline(0)
+       console.log("session",response.session);
        navigate(`/user/${response.user.$id}`)
        showToast.success(response.message);
         return;

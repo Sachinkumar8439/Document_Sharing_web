@@ -147,7 +147,7 @@ async signUp(email, password,phone) {
 
   async login(email, password) {
     try {
-       await account.createEmailPasswordSession(email, password);
+      const session =  await account.createEmailPasswordSession(email, password);
       const user = await account.get();
 
       if (!user.emailVerification) {
@@ -158,7 +158,7 @@ async signUp(email, password,phone) {
         };
       }
 
-      return { success: true, message: "Login successful", user };
+      return { success: true, message: "Login successful", user , session };
     } catch (error) {
       console.error("Login error:", error);
       return { success: false, message: error.message };

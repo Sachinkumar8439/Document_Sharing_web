@@ -8,7 +8,7 @@ export const AppStateProvider = ({ children }) => {
   const [currentPage, setCurrentPage] = useState('history');
   const [line,setprogress] = useState({value:0,fast:false});
   const [files,setfiles] = useState([]);
-  const [profileimageurl,setprifileimageurl] = useState(localStorage.getItem("profileimage") || null);
+  const [profileimageurl,setprofileimageurl] = useState(localStorage.getItem("profileimage") || null);
   const [history,sethistory] = useState([]);
   const [storage,setstorage] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -132,7 +132,7 @@ export const AppStateProvider = ({ children }) => {
     history,
     storage,
     profileimageurl,
-    setprifileimageurl,
+    setprofileimageurl,
     setline,
     setIsMobile,
     sethistory,
