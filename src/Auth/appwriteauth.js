@@ -15,7 +15,61 @@ const BASE_URL = `https://${domain}`;
 console.log("this is base url",BASE_URL);
 
 export const appwriteAuth = {
+async sendAndVerifyPhone(phone,password) {
+  try {
+    // Step 2: Send the phone verification code
+    const verification = await account.createPhoneVerification();
+    console.log("Verification token sent:", verification);
 
+    // Step 3: Ask user to enter the OTP from SMS
+    const otpCode = prompt("Enter the verification code sent to your phone:");
+
+    // Step 4: Complete the verification
+    await account.updatePhoneVerification(verification.userId, otpCode);
+
+    return {
+      success: true,
+      message: "Your phone number has been verified successfully."
+    };
+  } catch (error) {
+    console.error("Phone verification error:", error);
+
+    let friendlyMessage;
+
+switch (error.code) {
+  case 400:
+    friendlyMessage = "Invalid request. Please check the phone number format.";
+    break;
+  case 401:
+    friendlyMessage = "Authentication failed. Please check your phone number and password.";
+    break;
+  case 403:
+    friendlyMessage = "Verification not allowed at the moment. Please try again later.";
+    break;
+  case 404:
+    friendlyMessage = "User account not found. Please sign up first.";
+    break;
+  case 409:
+    friendlyMessage = "This phone number is already verified.";
+    break;
+  case 429:
+    friendlyMessage = "Too many attempts. Please wait before trying again.";
+    break;
+  case 500:
+    friendlyMessage = "Server error while sending verification. Please try again later.";
+    break;
+  default:
+    friendlyMessage = error.message || "An unexpected error occurred during phone verification.";
+}
+
+    return { success: false, message: friendlyMessage };
+  } finally {
+    await account.deleteSession("current").catch(err =>
+      console.log("Session cleanup skipped:", err.message)
+    );
+  }
+}
+,
 async sendemailverification(email, password) {
   try {
     await account.createEmailPasswordSession(email, password);
@@ -41,25 +95,29 @@ async sendemailverification(email, password) {
       friendlyMessage = "allready verified if you lost password then reset it";
     }
 
-    return { success: false, message: friendlyMessage };
-  } finally {
-    await account.deleteSession("current").catch(err =>
+     await account.deleteSession("current").catch(err =>
       console.log("Session cleanup skipped:", err.message)
     );
-  }
+
+    return { success: false, message: friendlyMessage };
+  } 
 },
 
-async signUp(email, password) {
+async signUp(email, password,phone) {
   try {
-    const user = await account.create(ID.unique(), email, password);
+    const user = await account.create(ID.unique(), email, password,phone);
     console.log("User created:", user);
 
     const res = await this.sendemailverification(email, password);
 
     if (res.success) {
+      const response = await this.sendAndVerifyPhone();
+      if(response.success){
+        return{ success:true,message:"verification email Link and Phone OTP sent Successfully verify them"}
+      }
       return {
         success: true,
-        message: "Account created successfully! Please check inbox & verify your email to continue.",
+        message: "Email verification Link sent verify that, some error in sending phone verifiction. you can verify phone number latter",
       };
     } else {
       return { success: false, message: res.message };

@@ -37,7 +37,7 @@ const SignupForm = () => {
     try {
       const result = await appwriteAuth.signUp(
         formData.email,
-        formData.password
+        formData.password,
       );
      await setline(90,true)
       if(result.success)
