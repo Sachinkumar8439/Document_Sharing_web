@@ -61,3 +61,8 @@ export const checkfile = async(files ,data)=>{
      }
      return !files.some((f) => f.name === data.file.name);
 }
+
+export const setTheme = (theme) => {
+    document.documentElement.className = theme;
+    localStorage.setItem('theme', theme);
+  };

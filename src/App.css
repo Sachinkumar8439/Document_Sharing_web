@@ -1,4 +1,4 @@
-/* Base Styles */
+Base Styles
 body {
   background-color: #2c2c2c;
 }
@@ -10,76 +10,7 @@ body {
  
 }
 
-/* Confirmation Popup */
-.confirmation-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  padding: 20px;
-}
 
-.confirmation-box {
-  background: #1615157c;
-  padding: 25px;
-  border-radius: 10px;
-  width: 450px;
-  max-width: 100%;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: fadeIn 0.3s ease;
-}
-
-.confirmation-box p {
-  margin-bottom: 25px;
-  color: var(--text-primary);
-  line-height: 1.5;
-}
-
-.confirmation-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.confirmation-buttons button {
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all var(--transition-speed) ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cancel-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--text-primary);
-}
-
-.cancel-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.confirm-btn {
-  background: var(--accent);
-  color: white;
-  border: none;
-}
-
-.confirm-btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-}
-
-/* Reset Password Form */
 .reset-password-container {
   background-color: #121212;
   min-height: 100vh;
@@ -160,45 +91,3 @@ body {
   text-align: center;
 }
 
-/* Progress Bar */
-.progressbox {
-  background: none;
-  position: absolute;
-  width: 100%;
-  height: 5px;
-  z-index: 5000;
-}
-
-.progressline {
-  background-color: #ffffff;
-  width: 0%;
-  height: 100%;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { 
-    opacity: 0; 
-    transform: translateY(10px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
-}
-
-/* Responsive Adjustments */
-@media (max-width: 480px) {
-  .confirmation-box {
-    padding: 20px;
-  }
-  
-  .confirmation-buttons {
-    flex-direction: column-reverse;
-  }
-  
-  .confirmation-buttons button {
-    width: 100%;
-    justify-content: center;
-  }
-}

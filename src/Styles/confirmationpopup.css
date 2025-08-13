@@ -1,0 +1,121 @@
+
+.App {
+  position: relative;
+  width: 100%;
+  height:100%;
+ 
+}
+.confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 1rem;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.confirmation-box {
+  background: color-mix(in srgb, var(--darker-bg) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 1rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    0 0 0 1px color-mix(in srgb, var(--content-bg) 30%, transparent) inset;
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  outline: 3px solid var(--accent);
+  /* text-align: center; */
+}
+
+
+.confirmation-box h2 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.confirmation-box p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+.confirmation-buttons {
+  display: flex;
+  justify-content: center;
+  gap:2rem;
+  margin-top: 1.5rem;
+}
+
+.confirmation-buttons button {
+    width: 40%;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: none;
+}
+
+.cancel-btn {
+  background: var(--darker-bg);
+  color: var(--text-primary);
+}
+
+.cancel-btn:hover {
+  background: var(--accent-hover);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.confirm-btn {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 8px rgba(142, 68, 173, 0.3);
+}
+
+.confirm-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(142, 68, 173, 0.4);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .confirmation-box {
+    padding: 1.5rem;
+  }
+  
+  .confirmation-buttons {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+  
+  .confirmation-buttons button {
+    width: 100%;
+    justify-content: center;
+  }
+}

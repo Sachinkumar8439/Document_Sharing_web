@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import "./dashboard.css";
+// import "./dashboard.css";
+import "../components/dashboardsections.css";
+import "./uploadingpage.css"
 import { createHistoryEntry, getFilePreview, gethistory, uploadFileForUser } from "../configs/appwriteconfig";
 import {
   FaUser,

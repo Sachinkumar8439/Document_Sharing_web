@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAppState } from "../Context/AppStateContext";
 import { appwriteAuth } from "../Auth/appwriteauth";
 import { FaEye, FaEyeSlash, FaKey } from "react-icons/fa";
+import "./resetpasswordpage.css"
 
 const ResetPasswordForm = () => {
   const { showToast } = useAppState();

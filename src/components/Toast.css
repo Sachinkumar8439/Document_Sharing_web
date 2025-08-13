@@ -1,11 +1,11 @@
-/* Toast container */
+
 .toast {
   position: fixed;
-  bottom: 30px;
+  bottom: 10%;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #333;
-  color: white;
+  background: var(--accent);
+  color: var(--card-bg);
   padding: 12px 16px;
   border-radius: 8px;
   display: flex;
@@ -15,9 +15,9 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   animation: slideInUp 0.3s ease-in-out;
   z-index: 9999;
+  outline: 2px solid var(--text-secondary);
 }
 
-/* Toast animation */
 @keyframes slideInUp {
   from {
     transform: translateX(-50%) translateY(50px);
@@ -29,7 +29,6 @@
   }
 }
 
-/* Toast content */
 .toast-content {
   display: flex;
   align-items: center;
@@ -37,49 +36,50 @@
   flex-grow: 1;
 }
 
-/* Toast icon styling */
 .toast-icon {
   font-size: 20px;
 }
 
 .toast-icon.success {
-  color: #00e676; /* Green */
+  color: var(--accent);
 }
 
 .toast-icon.error {
-  color: #ff3d00; /* Red */
+  color: white;
 }
 
-/* Toast background based on type */
 .toast.success {
-  background-color: #2e7d32; /* Green */
+  background-color: var(--card-bg);
+  color: var(--accent);
 }
 
 .toast.error {
-  color :white;
-  background-color: #c62828; /* Red */
+  background-color: red;
+  color: white;
 }
 
-/* Toast message */
 .toast-message {
   flex-grow: 1;
   font-size: 15px;
   word-break: break-word;
 }
 
-/* Close button */
 .toast-close {
   background: none;
   border: none;
-  color: white;
+  color: inherit;
   font-size: 18px;
   cursor: pointer;
   padding-left: 10px;
   display: flex;
   align-items: center;
+  transition: all 0.2s ease-in;
+}
+.toast-close:hover{
+  background:none;
+  transform:scale(1.3) ;
 }
 
-/* Responsive: Ensure it looks good on mobile */
 @media (max-width: 480px) {
   .toast {
     padding: 10px 12px;

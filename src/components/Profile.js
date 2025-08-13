@@ -86,7 +86,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="profile-container">
+    <div className="documents-container dashboardsection-container">
       <h2>User Profile</h2>
       <p className="profile-subtitle">Manage your account settings</p>
 
@@ -98,12 +98,12 @@ const Profile = () => {
             ) : (
               <FaUserCircle className="avatar-default" />
             )}
-            <button onClick={(e)=>{
+            <div onClick={(e)=>{
               e.preventDefault()
               showToast.success("Just Upload __profile.jpg file by + button in right bottom corner",10000)
             }} title="want to add new profile image just upload __profile.jpg file or image by + button" className="edit-avatar-btn">
-              <FaCamera />
-            </button>
+              <FaCamera className="profile-image-camera" />
+            </div>
           </div>
 
           <div className="profile-info">

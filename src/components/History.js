@@ -33,7 +33,7 @@ const History = () => {
   const { history } = useAppState();
 
   return (
-    <div className="documents-container">
+    <div className="documents-container dashboardsection-container">
       <h2>Document History</h2>
       <p className="documents-subtitle">Recent activities on your documents</p>
 

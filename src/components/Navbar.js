@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome, faUser, faCogs, faEnvelope, faBars,faLogin } from "@fortawesome/free-solid-svg-icons";
-import "../components/Navbar.css"
+// import "../components/Navbar.css"
+import "../pages/landingpage.css"
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

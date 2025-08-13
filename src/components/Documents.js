@@ -166,7 +166,7 @@ export default function Documents() {
   }
 
   return (
-    <div className="documents-container">
+    <div className="documents-container dashboardsection-container">
       <h2>Your Documents</h2>
       <p className="documents-subtitle">All your saved documents</p>
 
@@ -194,7 +194,7 @@ export default function Documents() {
             loading...
           </div>
         )}
-            {!iscopied && <p style={{color:"white",background:"none", outline:"2px solid white", position:"fixed",top:"10px",right:"20px",padding:"5px",borderRadius:"2px"}}>copied</p>}
+            {!iscopied && <p style={{ outline:"2px solid white", position:"fixed",top:"10px",right:"20px",padding:"5px",borderRadius:"2px"}}>copied</p>}
         {filteredDocuments?.map((doc) => (
           <div key={doc.id} className="document-item">
             <div className="document-info">

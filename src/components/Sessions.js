@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './sessions.css';
+// import './sessions.css';
 import { useAuthState } from '../Context/Authcontext';
 import { appwriteAuth } from '../Auth/appwriteauth';
 import { useAppState } from '../Context/AppStateContext';

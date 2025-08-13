@@ -158,7 +158,7 @@ async signUp(email, password,phone) {
         };
       }
 
-      return { success: true, message: "Login successful", user , session };
+      return { success: true, message: "Login successfully", user , session };
     } catch (error) {
       console.error("Login error:", error);
       return { success: false, message: error.message };

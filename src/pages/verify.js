@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { appwriteAuth } from '../Auth/appwriteauth';
 import { useAppState } from '../Context/AppStateContext';
+import "./verify.css"
 
 const Verify = () => {
   const [message, setMessage] = useState('Verifying...');
@@ -31,10 +32,13 @@ const Verify = () => {
   }, [searchParams]);
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h2 style={{color:"white"}} >Email Verification</h2>
-      <p  style={{color:"white"}}>{message}</p>
-    </div>
+    <div className="verify-container">
+  <div className={`verify-card ${message.includes('Invalid') ? 'error' : 'success'}`}>
+    <h2>Email Verification</h2>
+    <p>{message}</p>
+    {message === 'Verifying...' && <div className="verify-loading"></div>}
+  </div>
+</div>
   );
 };
 

@@ -1,11 +1,9 @@
-/* General Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Navbar Styles */
 .navbar {
   background-color: #333;
   color: #fff;
@@ -71,7 +69,6 @@
   cursor: pointer;
 }
 
-/* Responsive Styles */
 @media (max-width: 768px) {
   .navbar-menu {
     display: none;

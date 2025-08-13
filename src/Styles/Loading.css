@@ -1,3 +1,20 @@
+:root {
+  /* --darker-bg: #e5e5ea;
+  --nav-bg: #f8f0f5;
+  --accent: #8e44ad;
+  --accent-hover: #5e3370;
+  --text-primary: #4a235a;
+  --text-secondary: #6c3483;
+  --content-bg: #ffffff;
+  --card-bg: #f9f9f9; */
+
+  /* Loading specific variables */
+  --loading-overlay-bg: var(--darker-bg); 
+  --loading-icon-color: var(--accent);
+  --loading-text-color: var(--text-primary);
+  --loading-dot-color: var(--accent);
+}
+
 /* Loading Component Styles */
 .loading-container {
   position: fixed;
@@ -8,7 +25,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(39, 38, 38, 0.9);
+  background-color: var(--loading-overlay-bg);
   z-index: 9999;
 }
 
@@ -19,14 +36,14 @@
 
 .loading-icon {
   font-size: 4rem;
-  color: white;
+  color: var(--loading-icon-color);
   margin-bottom: 1.5rem;
   animation: bounce 2s infinite;
 }
 
 .loading-text {
   font-size: 1.5rem;
-  color: white;
+  color: var(--loading-text-color);
   margin-bottom: 1.5rem;
   font-weight: 600;
 }
@@ -41,7 +58,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: white;
+  background-color: var(--loading-dot-color);
   animation: pulse 1.5s infinite ease-in-out;
 }
 

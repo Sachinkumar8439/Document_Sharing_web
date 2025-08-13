@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// import "./landingpage.css"
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 // import { useAppState } from '../Context/AppStateContext';
@@ -11,13 +12,6 @@ const LandingPage = () => {
     <div  className='landingpage-container'>
      <Navbar/>
      <Hero/>
-      {/* {toast.show && (
-  <Toast 
-    message={toast.message} 
-    type={toast.type} 
-    onClose={() => setToast({...toast, show: false})}
-  />
-)} */}
     </div>
   );
 };

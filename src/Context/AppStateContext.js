@@ -1,11 +1,15 @@
 import { createContext, useContext, useState } from 'react';
 import { FaUser, FaFileAlt, FaCog, FaHistory,FaCheck, FaTimes } from 'react-icons/fa';
+import { setTheme } from '../utility/util';
+import "../Styles/confirmationpopup.css"
 
+setTheme(localStorage.getItem("theme") || "light")
 
 const AppStateContext = createContext();
 
 export const AppStateProvider = ({ children }) => {
   const [currentPage, setCurrentPage] = useState('history');
+  const [theme ,settheme] = useState(localStorage.getItem("theme") || "light")
   const [line,setprogress] = useState({value:0,fast:false});
   const [files,setfiles] = useState([]);
   const [profileimageurl,setprofileimageurl] = useState(localStorage.getItem("profileimage") || null);
@@ -14,6 +18,7 @@ export const AppStateProvider = ({ children }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
    const [confirmationState, setConfirmationState] = useState({
     show: false,
+    heading:'',
     message: '',
     resolve: null
   });
@@ -22,10 +27,11 @@ export const AppStateProvider = ({ children }) => {
        setprogress({value:value,fast:isfast || false});
   }
 
-  const showConfirmation = (message) => {
+  const showConfirmation = (heading ,message) => {
     return new Promise((resolve) => {
       setConfirmationState({
         show: true,
+        heading,
         message,
         resolve
       });
@@ -132,6 +138,8 @@ export const AppStateProvider = ({ children }) => {
     history,
     storage,
     profileimageurl,
+    theme,
+    settheme,
     setprofileimageurl,
     setline,
     setIsMobile,
@@ -155,6 +163,7 @@ export const AppStateProvider = ({ children }) => {
        {confirmationState.show && (
         <div className="confirmation-overlay">
           <div className="confirmation-box">
+            <h2>{confirmationState.heading}</h2>
             <p>{confirmationState.message}</p>
             <div className="confirmation-buttons">
               <button className="cancel-btn" onClick={handleCancel}>

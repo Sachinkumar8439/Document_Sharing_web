@@ -28,26 +28,31 @@ import { useAuthState } from "../Context/Authcontext";
 import { useAppState } from "../Context/AppStateContext";
 import { updatePassword } from "../configs/appwriteconfig";
 import UserSessionsModal from "./Sessions";
+import { setTheme } from "../utility/util";
 export function bytesToMB(bytes) {
-    const mb = bytes / (1024 * 1024);
-    return mb.toFixed(2); 
+  const mb = bytes / (1024 * 1024);
+  return mb.toFixed(2);
 }
 
 const Settings = () => {
-  const [isshowsession,setisshowsession] = useState(false);
-  const [passtate,setpasstate] = useState(-1);
-  const [password,setpassword] = useState("")
-  const { showConfirmation,showToast,setline,storage } = useAppState();
-  const { updateuser, user,sessions } = useAuthState();
+  const [isshowsession, setisshowsession] = useState(false);
+  const [passtate, setpasstate] = useState(-1);
+  const [password, setpassword] = useState("");
+  const { showConfirmation, showToast, setline, storage ,settheme,theme} = useAppState();
+  const { updateuser, user, sessions } = useAuthState();
   const navigate = useNavigate();
 
   const logout = async (e) => {
     e.preventDefault();
-    if(!await showConfirmation("Your session on this device will be deleted you can login again any time")){
+    if (
+      !(await showConfirmation("Are you sure ?",
+        "Your session on this device will be deleted you can login again any time"
+      ))
+    ) {
       return;
     }
     try {
-      await setline(90,true)
+      await setline(90, true);
       const response = await appwriteAuth.logout();
       console.log(response);
       if (response.success) {
@@ -55,112 +60,119 @@ const Settings = () => {
         localStorage.removeItem("page");
         showToast.success(response.message);
         navigate("/");
-       
+      } else {
+        showToast.error(response.message, 5000);
       }
-      else{
-
-        showToast.error(response.message,5000);
-      }
-
     } catch (error) {
-      showToast.error(error.message,5000);
-    } finally{
+      showToast.error(error.message, 5000);
+    } finally {
       setline(0);
     }
   };
 
- const deleteaccount = async(e)=>{
-  e.preventDefault();
-  try {
-const isconfirm = await showConfirmation(
-  "Are you sure you want to delete your account?\nThis action is permanent and cannot be undone."
-);    if(!isconfirm)return;
-    await setline(90,true)
-   const response =  await callAppwriteFunction("post",{userId:user?.$id,work:"deleteAccount"});
-   console.log(response);
-   if(response.success)
-   {
-    showToast.success(response.message);
-     updateuser(null);
-     navigate("/");
-   }
-   else{
-
-    showToast.error(response.message);
-    }
-
-  } catch (error) {
-    console.log(error)
-    showToast.error(error.message);
-    
-  }
-  finally{
-    setline(0)
-  }
-
- }
- const runpasswordchangeproccess = async(e)=>{
-  e.preventDefault();
-  switch (passtate) {
-    case -1:
-      setpasstate(0);
-      break;
-    case 0:
-      await setline(50,true)
-      localStorage.setItem("password","checkpassword123")
-      const response = await updatePassword(localStorage.getItem("password"),password)
-      if(response.success){ 
-        await setline(85,true)
-        const result = await updatePassword(password , localStorage.getItem("password"))
-        if(result.success){
-          setpasstate(1);
-          setpassword("");
-          showToast.success("Correct password!  enter new password in field")
-          localStorage.setItem("oldpassword",password);
-          await setline(0)
-        }
-        else{
-          localStorage.setItem("unupdatepassword",true);
-        }
-      }else{
-        showToast.error(response.message)
+  const deleteaccount = async (e) => {
+    e.preventDefault();
+    try {
+      const isconfirm = await showConfirmation(
+        "Are you sure you want to delete your account?\nThis action is permanent and cannot be undone."
+      );
+      if (!isconfirm) return;
+      await setline(90, true);
+      const response = await callAppwriteFunction("post", {
+        userId: user?.$id,
+        work: "deleteAccount",
+      });
+      console.log(response);
+      if (response.success) {
+        showToast.success(response.message);
+        updateuser(null);
+        navigate("/");
+      } else {
+        showToast.error(response.message);
       }
-        await setline(0)
-      break;
+    } catch (error) {
+      console.log(error);
+      showToast.error(error.message);
+    } finally {
+      setline(0);
+    }
+  };
+  const runpasswordchangeproccess = async (e) => {
+    e.preventDefault();
+    switch (passtate) {
+      case -1:
+        setpasstate(0);
+        break;
+      case 0:
+        await setline(50, true);
+        localStorage.setItem("password", "checkpassword123");
+        const response = await updatePassword(
+          localStorage.getItem("password"),
+          password
+        );
+        if (response.success) {
+          await setline(85, true);
+          const result = await updatePassword(
+            password,
+            localStorage.getItem("password")
+          );
+          if (result.success) {
+            setpasstate(1);
+            setpassword("");
+            showToast.success("Correct password!  enter new password in field");
+            localStorage.setItem("oldpassword", password);
+            await setline(0);
+          } else {
+            localStorage.setItem("unupdatepassword", true);
+          }
+        } else {
+          showToast.error(response.message);
+        }
+        await setline(0);
+        break;
       case 1:
         await setline(80);
-        const res = await updatePassword(password,localStorage.getItem("oldpassword"))
-        if(res.success){
-          showToast.success(res.message)
-          localStorage.removeItem("password")
-          localStorage.removeItem("oldpassword")
-          setpasstate(-1)
-          setpassword("")
-        }else{
-          showToast.error(res.message)
+        const res = await updatePassword(
+          password,
+          localStorage.getItem("oldpassword")
+        );
+        if (res.success) {
+          showToast.success(res.message);
+          localStorage.removeItem("password");
+          localStorage.removeItem("oldpassword");
+          setpasstate(-1);
+          setpassword("");
+        } else {
+          showToast.error(res.message);
         }
-        await setline(0)
+        await setline(0);
         break;
-    default:
-      break;
+      default:
+        break;
+    }
+  };
+  const handlethemechange = (e)=>{
+      e.preventDefault()
+      setTheme(e.target.value);
+      settheme(e.target.value)
   }
- }
- const cencelpasswordset = (e)=>{
-  e.preventDefault();
-  setpassword("");
-  setpasstate(-1);
-
- }
+  const cencelpasswordset = (e) => {
+    e.preventDefault();
+    setpassword("");
+    setpasstate(-1);
+  };
 
   return (
-    <div className="settings-container">
-      {isshowsession && <UserSessionsModal onClose={()=>setisshowsession(false)}/>}
+    <div className="documents-container dashboardsection-container">
+      {isshowsession && (
+        <UserSessionsModal onClose={() => setisshowsession(false)} />
+      )}
       <h2>Settings</h2>
       <p className="settings-subtitle">
         Configure your application preferences
       </p>
 
-      <div  className="settings-categories">
+      <div className="settings-categories">
         <div className="settings-category">
           <div className="category-header">
             <FaUserCog className="category-icon" />
@@ -174,15 +186,40 @@ const isconfirm = await showConfirmation(
                   <h4>Password</h4>
                   <p>Change your account password</p>
                 </div>
-                {passtate!==-1 && <button onClick={cencelpasswordset} className="upgrade-btn">  X</button> }
-               
+                {passtate !== -1 && (
+                  <button onClick={cencelpasswordset} className="upgrade-btn">
+                    {" "}
+                    X
+                  </button>
+                )}
               </div>
-             
+
               <button onClick={runpasswordchangeproccess} className="edit-btn">
-                {passtate===0?"submit":passtate===1?"Update":<><FaEdit /> change</>}  
+                {passtate === 0 ? (
+                  "submit"
+                ) : passtate === 1 ? (
+                  "Update"
+                ) : (
+                  <>
+                    <FaEdit /> change
+                  </>
+                )}
               </button>
 
-              {passtate !== -1 && <input className="password-change-closebtn"  placeholder={passtate===0?"Enter current password":"Enter New Password"} style={{padding:"8px",borderRadius:"5px",background:"black",border:'none',color:"white",width:"100%",minWidth:"60%"}} type='password' onChange={(e)=> setpassword(e.target.value)} value={password}></input>}
+              {passtate !== -1 && (
+                <input
+                  className="password-change-closebtn"
+                  placeholder={
+                    passtate === 0
+                      ? "Enter current password"
+                      : "Enter New Password"
+                  }
+                  //  style={{padding:"8px",borderRadius:"5px",background:"black",border:'none',color:"white",width:"100%",minWidth:"60%"}}
+                  type="password"
+                  onChange={(e) => setpassword(e.target.value)}
+                  value={password}
+                ></input>
+              )}
               {/* <div style={{display:"flex",alignItems:"center",gap:"8px",width:"100%"}}>
               </div> */}
             </div>
@@ -207,7 +244,6 @@ const isconfirm = await showConfirmation(
             <h3>Privacy & Security</h3>
           </div>
           <div className="category-content">
-
             <div className="setting-item toggle-item">
               <div className="setting-info">
                 <FaHistory className="setting-icon" />
@@ -225,16 +261,18 @@ const isconfirm = await showConfirmation(
               <div className="setting-info">
                 <FaUser className="setting-icon" />
                 <div>
-                  <h4>Sessions</h4>
-                  <p>manage where you logged in</p>
+                  <h4>  <span className="">
+                  {sessions.total} Active
+                </span> Sessions</h4>
+                <p>manage where you logged in</p>
                 </div>
               </div>
               <div className="theme-options">
-                <button onClick={()=>setisshowsession(true)} className="theme-option dark active">
+                <button
+                  onClick={() => setisshowsession(true)}
+                  className=" edit-btn dark active"
+                >
                   <FaSun /> Manage
-                </button>
-                <button  className="theme-option light">
-                  {sessions.total} Active
                 </button>
               </div>
             </div>
@@ -267,14 +305,16 @@ const isconfirm = await showConfirmation(
                   <p>Dark/Light mode preferences</p>
                 </div>
               </div>
-              <div className="theme-options">
-                <button className="theme-option dark active">
-                  <FaMoon /> Dark
-                </button>
-                <button className="theme-option light">
-                  <FaSun /> Light
-                </button>
-              </div>
+              <select value={theme} onChange={handlethemechange} className="selector">
+                <option value="pink-light">pink-light</option>
+                <option value="forest">forest</option>
+                <option value="midnight-purple">midnight-purple</option>
+                <option value="solarized">solarized</option>
+                <option value="dracula">dracula</option>
+                <option value="monochrome">monochrome</option>
+                <option value="cyber-dark">cyber-dark</option>
+                <option value="warm-sunset">warm-sunset</option>
+              </select>
             </div>
 
             <div className="setting-item">
@@ -285,7 +325,7 @@ const isconfirm = await showConfirmation(
                   <p>Select your preferred language</p>
                 </div>
               </div>
-              <select className="language-select">
+              <select className="selector">
                 <option>English</option>
                 <option>Spanish</option>
                 <option>French</option>
@@ -303,10 +343,16 @@ const isconfirm = await showConfirmation(
           <div className="category-content">
             <div className="storage-info">
               <div className="storage-progress">
-                <div className="progress-bar" style={{ width: `${(bytesToMB(storage)/50)*100}%` }}></div>
+                <div
+                  className="progress-bar"
+                  style={{ width: `${(bytesToMB(storage) / 50) * 100}%` }}
+                ></div>
               </div>
               <div className="storage-details">
-                <span>{bytesToMB(storage)}MB of 50 MB used [ {(bytesToMB(storage)/50)*100}% ]</span>
+                <span>
+                  {bytesToMB(storage)}MB of 50 MB used [{" "}
+                  {(bytesToMB(storage) / 50) * 100}% ]
+                </span>
                 <button className="upgrade-btn">
                   <FaArrowUp /> Upgrade
                 </button>
