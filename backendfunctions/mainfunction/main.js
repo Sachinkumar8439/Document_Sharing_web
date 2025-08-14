@@ -15,7 +15,6 @@ const usercollectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID;
 const historycollectionId = process.env.REACT_APP_APPWRITE_HISTORY_COLLECTION_ID
 const bucketId = process.env.REACT_APP_APPWRITE_BUCKET_ID;
 
-console.log("databaseid ",databaseId," usercolectionid ",usercollectionId," historycollectionid ",historycollectionId," bucketid ",bucketId)
 
 // ===== CORS Headers =====
 const corsHeaders = {
@@ -35,6 +34,7 @@ function handleCORS(req, res) {
 
 module.exports = async function ({ req, res, log }) {
   log("Function is running");
+  console.log("databaseid ",databaseId," usercolectionid ",usercollectionId," historycollectionid ",historycollectionId," bucketid ",bucketId)
 
   if (!handleCORS(req, res)) return;
 
