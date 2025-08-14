@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { appwriteAuth } from "../Auth/appwriteauth";
 import { callAppwriteFunction } from "../API/functioncall";
 import {
+  FaFont,
   FaUser,
   FaHistory,
   FaEdit,
@@ -268,7 +269,7 @@ const Settings = () => {
                 <div>
                   <h4>  <span className="">
                   {sessions.total} Active
-                </span> Sessions</h4>
+                </span> Session{sessions.total === 1?"":"s"}</h4>
                 <p>manage where you logged in</p>
                 </div>
               </div>
@@ -306,8 +307,8 @@ const Settings = () => {
               <div className="setting-info">
                 <FaPalette className="setting-icon" />
                 <div>
-                  <h4>Theme</h4>
-                  <p>Dark/Light mode preferences</p>
+                  <h4>Themes</h4>
+                  <p>Choose Good looking Themes</p>
                 </div>
               </div>
               <select value={theme} onChange={handlethemechange} className="selector">
@@ -323,7 +324,7 @@ const Settings = () => {
             </div>
             <div className="setting-item">
               <div className="setting-info">
-                <FaPalette className="setting-icon" />
+                <FaFont className="setting-icon" />
                 <div>
                   <h4>Fonts</h4>
                   <p>Choose fonts matches you preferences</p>

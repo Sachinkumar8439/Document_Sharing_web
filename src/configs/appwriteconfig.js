@@ -62,7 +62,7 @@ export const uploadFileForUser = async (file, permissionSettings = {},setline) =
       permissions,
       (uploadProgress) => {
       const percent = parseFloat(uploadProgress.progress.toFixed(2));
-      const adjusted = (percent / 100) * 98;
+      const adjusted = (percent / 100) * 100;
       setline(adjusted.toFixed(0));
       }
     );
