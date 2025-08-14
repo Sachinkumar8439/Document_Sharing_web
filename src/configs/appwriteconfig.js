@@ -8,7 +8,7 @@ const storage = new Storage(client);
 const databases = new Databases(client);
 const bucketId = process.env.REACT_APP_APPWRITE_BUCKET_ID;
 const databaseId = process.env.REACT_APP_APPWRITE_DATABASE_ID;
-const collectionId = process.env.REACT_APP_APPWRITE_COLLECTION_ID;
+const collectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID;
 const historyId = process.env.REACT_APP_APPWRITE_HISTORY_COLLECTION_ID;
 let userId = null;
 try {
