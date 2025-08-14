@@ -17,28 +17,25 @@ const bucketId = process.env.REACT_APP_APPWRITE_BUCKET_ID;
 
 console.log("databaseid ",databaseId," usercolectionid ",usercollectionId," historycollectionid ",historycollectionId," bucketid ",bucketId)
 
+// ===== CORS Headers =====
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+};
+
 // ===== CORS Middleware =====
 function handleCORS(req, res) {
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  };
-
   if (req.method === "OPTIONS") {
     res.send("", 204, corsHeaders);
-    return false; // Stop execution for preflight
+    return false; 
   }
-
-  // Attach headers to every normal response
-  res.setHeaders(corsHeaders);
   return true;
 }
 
 module.exports = async function ({ req, res, log }) {
   log("Function is running");
 
-  // Run CORS handler
   if (!handleCORS(req, res)) return;
 
   try {
