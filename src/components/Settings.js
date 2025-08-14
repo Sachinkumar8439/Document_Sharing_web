@@ -28,7 +28,8 @@ import { useAuthState } from "../Context/Authcontext";
 import { useAppState } from "../Context/AppStateContext";
 import { updatePassword } from "../configs/appwriteconfig";
 import UserSessionsModal from "./Sessions";
-import { setTheme } from "../utility/util";
+import { setFont, setfont, setTheme } from "../utility/util";
+import { beautifulFonts, fonts } from "../data";
 export function bytesToMB(bytes) {
   const mb = bytes / (1024 * 1024);
   return mb.toFixed(2);
@@ -38,7 +39,7 @@ const Settings = () => {
   const [isshowsession, setisshowsession] = useState(false);
   const [passtate, setpasstate] = useState(-1);
   const [password, setpassword] = useState("");
-  const { showConfirmation, showToast, setline, storage ,settheme,theme} = useAppState();
+  const { showConfirmation, showToast, setline, storage ,settheme,theme,font,setfont} = useAppState();
   const { updateuser, user, sessions } = useAuthState();
   const navigate = useNavigate();
 
@@ -155,6 +156,10 @@ const Settings = () => {
       e.preventDefault()
       setTheme(e.target.value);
       settheme(e.target.value)
+  }
+  const handlesetfont = (e)=>{
+    e.preventDefault();
+    setfont(e.target.value)
   }
   const cencelpasswordset = (e) => {
     e.preventDefault();
@@ -314,6 +319,22 @@ const Settings = () => {
                 <option value="monochrome">monochrome</option>
                 <option value="cyber-dark">cyber-dark</option>
                 <option value="warm-sunset">warm-sunset</option>
+              </select>
+            </div>
+            <div className="setting-item">
+              <div className="setting-info">
+                <FaPalette className="setting-icon" />
+                <div>
+                  <h4>Fonts</h4>
+                  <p>Choose fonts matches you preferences</p>
+                </div>
+              </div>
+              <select value={font} onChange={handlesetfont} className="selector">
+               {fonts?.serif?.map((font,index) => (
+        <option key={index} value={font}>
+          {font}
+        </option>
+      ))}
               </select>
             </div>
 

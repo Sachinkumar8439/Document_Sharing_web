@@ -66,3 +66,7 @@ export const setTheme = (theme) => {
     document.documentElement.className = theme;
     localStorage.setItem('theme', theme);
   };
+export const setFont = (font) => {
+    // document.documentElement.className = theme;
+    localStorage.setItem('font', font);
+  };

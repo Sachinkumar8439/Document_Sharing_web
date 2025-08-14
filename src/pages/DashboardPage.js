@@ -242,7 +242,7 @@ const Dashboard = () => {
           className={page === "documents" ? "active" : ""}
         >
           <FaFileAlt />
-          {!isMobile && <span>Documents</span>}
+          {!isMobile && <span>Docs</span>}
         </button>
         <button
           onClick={() => setPage("history")}

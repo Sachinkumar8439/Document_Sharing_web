@@ -7,12 +7,12 @@ import Progressbar from "./components/progress";
 
 
 function App() {
-  const {line} = useAppState()
+  const {line,font} = useAppState()
   const {routes,} = useAuthState()
   
   return (
     <BrowserRouter>
-        <div className="App">
+        <div style={{ fontFamily:font}} className="App">
           <Progressbar line={line}/>  
          <RouteHandler routes={routes}/>
            

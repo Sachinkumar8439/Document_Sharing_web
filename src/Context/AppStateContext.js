@@ -1,15 +1,54 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { FaUser, FaFileAlt, FaCog, FaHistory,FaCheck, FaTimes } from 'react-icons/fa';
-import { setTheme } from '../utility/util';
+import { setFont, setTheme } from '../utility/util';
 import "../Styles/confirmationpopup.css"
+import { beautifulFonts, fonts } from '../data';
+import WebFont from "webfontloader";
 
-setTheme(localStorage.getItem("theme") || "light")
+
+setTheme(localStorage.getItem("theme") || "cyber-dark")
+// const savedFont = localStorage.getItem("font") || 'roboto';
+// import(`@fontsource/${savedFont}`).then(() => {
+//   console.log("it is running ")
+//   document.documentElement.style.setProperty('--current-font', savedFont);
+// }).catch(console.error);
 
 const AppStateContext = createContext();
 
+//   const fonts1 = [
+//   "Roboto",
+//   "Open Sans",
+//   "Montserrat",
+//   "Poppins",
+//   "Lato",
+//   "Merriweather",
+//   "Spectral",
+//   "Fira Sans",
+//   "Inter",
+//   "Raleway",
+//   "Playfair Display",
+//   "Work Sans",
+//   "Ubuntu",
+//   "Source Sans Pro",
+//   "Atkinson Hyperlegible"
+
+// ];
+// const texturedFonts = [
+//   "Water Brush",
+//   "Cabin Sketch",
+//   "Splash",
+//   "Texturina",
+//   "Tektur",
+//   "Silkscreen",
+//   "Limelight",
+//   "Glegoo",
+//   "Mate"
+// ];
+
 export const AppStateProvider = ({ children }) => {
   const [currentPage, setCurrentPage] = useState('history');
-  const [theme ,settheme] = useState(localStorage.getItem("theme") || "light")
+  const [font ,setfont] = useState(localStorage.getItem("font") || fonts?.serif[0])
+  const [theme ,settheme] = useState(localStorage.getItem("theme") || "cyber-dark")
   const [line,setprogress] = useState({value:0,fast:false});
   const [files,setfiles] = useState([]);
   const [profileimageurl,setprofileimageurl] = useState(localStorage.getItem("profileimage") || null);
@@ -22,10 +61,24 @@ export const AppStateProvider = ({ children }) => {
     message: '',
     resolve: null
   });
+  // 3,5,6,7,11
+  // ** 5,6,7,8,9
+
+  useEffect(() => {
+    WebFont.load({
+      google: {
+        families: [font]
+      }
+    });
+    if(font) localStorage.setItem("font",font)
+  }, [font]);
 
   const setline = async (value,isfast)=>{
        setprogress({value:value,fast:isfast || false});
   }
+
+
+
 
   const showConfirmation = (heading ,message) => {
     return new Promise((resolve) => {
@@ -139,6 +192,8 @@ export const AppStateProvider = ({ children }) => {
     storage,
     profileimageurl,
     theme,
+    font,
+    setfont,
     settheme,
     setprofileimageurl,
     setline,
@@ -161,7 +216,7 @@ export const AppStateProvider = ({ children }) => {
     <AppStateContext.Provider value={value}>
       {children}
        {confirmationState.show && (
-        <div className="confirmation-overlay">
+        <div style={{fontFamily: font}} className="confirmation-overlay">
           <div className="confirmation-box">
             <h2>{confirmationState.heading}</h2>
             <p>{confirmationState.message}</p>

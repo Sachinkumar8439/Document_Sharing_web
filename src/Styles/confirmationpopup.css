@@ -26,14 +26,14 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 1rem;
-  border-radius: 12px;
+  border-radius:5px;
   width: 100%;
   max-width: 420px;
   box-shadow: 
     0 4px 20px rgba(0, 0, 0, 0.1),
     0 0 0 1px color-mix(in srgb, var(--content-bg) 30%, transparent) inset;
   border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
-  outline: 3px solid var(--accent);
+  outline: 2px solid var(--accent);
   /* text-align: center; */
 }
 
@@ -46,7 +46,7 @@
 }
 
 .confirmation-box p {
-  color: var(--text-secondary);
+  color: var(--text-primary);
   margin-bottom: 1rem;
   line-height: 1.5;
   font-size: 1rem;
