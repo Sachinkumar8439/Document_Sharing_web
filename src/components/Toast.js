@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { FaCheckCircle, FaExclamationCircle, FaTimes } from 'react-icons/fa';
 import './Toast.css';
+import { useAppState } from '../Context/AppStateContext';
 
 const Toast = ({ message, type, onClose, duration = 3000 }) => {
+  const {font} = useAppState();
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -23,7 +25,7 @@ const Toast = ({ message, type, onClose, duration = 3000 }) => {
   };
 
   return (
-    <div className={`toast ${type}`}>
+    <div style={{fontFamily:font}}  className={`toast ${type}`}>
       <div className="toast-content">
         {getIcon()}
         <span className="toast-message">{message}</span>
