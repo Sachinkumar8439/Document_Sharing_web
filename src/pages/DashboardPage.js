@@ -121,7 +121,7 @@ const Dashboard = () => {
     }
     else{
       const newfile = response.newfile;
-      await setline(98,true)
+      await setline(99,true)
       await createHistoryEntry({id:newfile.id,name:newfile.name,fileType:newfile.fileType,fileSize:newfile.fileSize,uploadedAt:newfile.uploadedAt,userId:newfile.userId})
       showToast.success("Docuemnt Uploaded Successfully");
       // const formatehistory = await formatHistoryData(newfile);

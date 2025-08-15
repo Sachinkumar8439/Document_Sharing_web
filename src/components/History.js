@@ -1,9 +1,21 @@
-import React from "react";
-import {FaCalendarAlt ,
-
+import React, { useEffect, useRef, useState } from "react";
+// FaCalendarAlt ,
+import {
+  //  FaFileAlt,
+  FaDownload,
+  FaEdit,
+  FaTrash,
+  FaSearch,
+  FaCalendarAlt,
+  FaDatabase,
+  FaFolderOpen,
+  FaShare,
+  FaGlobe,
+  FaCopy,
 } from "react-icons/fa";
 import { useAppState } from "../Context/AppStateContext";
 import { getFileIcon } from "../utility/util";
+import { deleteDocuments } from "../configs/appwriteconfig";
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp);
@@ -23,20 +35,201 @@ const formatTime = (timestamp) => {
   });
 };
 
-
 // const getFileTypeIcon = (fileType) => {
 //   // You can map specific icons per type if needed
 //   return <FaFileAlt className={`file-icon ${fileType}`} />;
 // };
 
 const History = () => {
-  const { history } = useAppState();
+  const [isaditing, setisditing] = useState(false);
+  const timerRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const [duration, setDuration] = useState(0);
+
+  const { history, setline, sethistory, showToast, showConfirmation } =
+    useAppState();
+  const [checkboxvisible, setcheckboxvisible] = useState(false);
+  const [deletelist, setdeletelist] = useState([]);
+  const [finaldeletelist, setfinaldeletelist] = useState([]);
+
+  const handlePressStart = (e, id) => {
+    const tag = e.target.tagName.toLowerCase();
+    if (
+      tag === "button" ||
+      tag === "input" ||
+      e.target.closest(".history-actions")
+    ) {
+      return; 
+    }
+    startTimeRef.current = Date.now();
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTimeRef.current;
+      setDuration(elapsed);
+
+      if (elapsed >= 800) {
+        clearInterval(timerRef.current); 
+        setcheckboxvisible(true);
+        setisditing(true);
+        addindeletelist(id);
+      }
+    }, 50);
+  };
+  const handlePressEnd = (e) => {
+    e.stopPropagation();
+    if (checkboxvisible) return;
+    clearInterval(timerRef.current);
+    setDuration(0);
+  };
+  const addindeletelist = async (id) => {
+    setdeletelist((prev) =>
+      prev.map((one) => (one.id === id ? { ...one, selected: true } : one))
+    );
+  };
+  const removefromdeletelist = async (id) => {
+    setdeletelist((prev) =>
+      prev.map((one) => (one.id === id ? { ...one, selected: false } : one))
+    );
+  };
+  useEffect(() => {
+  }, [finaldeletelist]);
+
+  useEffect(() => {
+    if (deletelist?.length) {
+      setfinaldeletelist(deletelist.filter((one) => one.selected));
+    }
+  }, [deletelist]);
+
+  const resetdeletelist = () => {
+    setdeletelist(
+      history?.map((element) => ({
+        id: element.id,
+        selected: false,
+      }))
+    );
+  };
+
+  useEffect(() => {
+    resetdeletelist();
+  }, [history]);
+
+  const handleeditingcancel = (e) => {
+    if(e) e.preventDefault();
+    resetdeletelist();
+    setisditing(false);
+    setcheckboxvisible(false);
+  };
+  const handledeletehistory = async (id) => {
+    if (finaldeletelist.length === 0 && !id) {
+      showToast.error("select atleast one to delete");
+      return;
+    }
+    if (id) {
+      const isconfirm = await showConfirmation(
+          "Are you sure ?",
+          "we ensure you carefully choose to delete it if action is deleted then you can not backup this file ."
+        );
+        if (!isconfirm) return;
+      const response = await deleteDocuments([{id:id,selected:true}], "h", setline);
+      if (response.success) {
+        sethistory((pre) => pre.filter((doc) => doc.id !== id));
+        showToast.success("history deleted succesfully");
+        handleeditingcancel()
+        setline(0);
+        return;
+      } else {
+        const isconfirm = await showConfirmation(
+          "Are you sure ?",
+          "your cant rollback your deleted file if history is deleted"
+        );
+        if (!isconfirm) return;
+        showToast.error(response.message);
+        handleeditingcancel()
+        setline(0);
+        return;
+      }
+    }
+    const response = await deleteDocuments(finaldeletelist, "h", setline);
+    if (response.success) {
+      sethistory((pre) =>
+        pre?.filter((his) => !finaldeletelist.some((doc) => doc.id === his.id))
+      );
+      showToast.success(response.message);
+      handleeditingcancel()
+      setline(0);
+      return;
+    } else {
+      showToast.error(response.message);
+      handleeditingcancel()
+    }
+
+    setline(0);
+    handleeditingcancel()
+  };
 
   return (
     <div className="documents-container dashboardsection-container">
-      <h2>Document History</h2>
-      <p className="documents-subtitle">Recent activities on your documents</p>
-
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <h2>Document History</h2>
+        {isaditing && (
+          <span className="checkbox-span">
+            <input
+              checked={
+                finaldeletelist?.length === 0
+                  ? false
+                  : finaldeletelist?.length === deletelist?.length && true
+              }
+              title="select all"
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setdeletelist((pre) =>
+                    pre?.map((one) => ({ ...one, selected: true }))
+                  );
+                } else
+                  setdeletelist((pre) =>
+                    pre?.map((one) => ({ ...one, selected: false }))
+                  );
+              }}
+              className="checkbox-input"
+              type="checkbox"
+            />
+          </span>
+        )}
+      </div>
+      {isaditing ? (
+        <div
+          style={{
+            padding: "10px 2px",
+            display: "flex",
+            gap: "20px",
+            justifyContent: "flex-end",
+          }}
+        >
+          <button className="selector" onClick={handleeditingcancel}>
+            cencel
+          </button>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              handledeletehistory();
+            }}
+            title="Delete"
+            className="edit-btn"
+          >
+            {" "}
+            Delete {finaldeletelist.length}
+          </button>
+        </div>
+      ) : (
+        <p className="documents-subtitle">
+          Recent activities on your documents
+        </p>
+      )}
       <div className="documents-list">
         {!history && (
           <div
@@ -50,8 +243,25 @@ const History = () => {
             Loading history...
           </div>
         )}
-        {history?.map((item) => (
-          <div key={item.id} className="document-item">
+        {history?.map((item, index) => (
+          <div
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              if (checkboxvisible) return;
+              handlePressStart(e, item.id);
+            }}
+            onMouseUp={handlePressEnd}
+            // onMouseLeave={handlePressEnd}
+            onTouchStart={(e) => {
+              if (checkboxvisible) return;
+              e.stopPropagation();
+              handlePressStart(e, item.id);
+            }}
+            onTouchEnd={handlePressEnd}
+            key={item.id}
+            id={item.id}
+            className="document-item"
+          >
             <div className="document-info">
               {getFileIcon(item.name, item.fileType)}
               <div className="document-details">
@@ -68,7 +278,36 @@ const History = () => {
                 </div>
               </div>
             </div>
-            {/* No action buttons here */}
+            <div className="history-actions">
+              {checkboxvisible && (
+                <span className="checkbox-span">
+                  <input
+                    checked={deletelist[index].selected}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      if (e.target.checked) {
+                        addindeletelist(item.id);
+                      } else {
+                        removefromdeletelist(item.id);
+                      }
+                    }}
+                    className="checkbox-input"
+                    type="checkbox"
+                  />
+                </span>
+              )}
+              <button
+                className="action-btn"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handledeletehistory(item.id)
+                }
+                }
+                title="Delete"
+              >
+                <FaTrash />
+              </button>
+            </div>
           </div>
         ))}
       </div>

@@ -84,6 +84,50 @@ textarea:focus {
 button:active {
   transform: scale(0.98);
 }
+.checkbox-input {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  appearance: none; /* Remove default browser style */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  
+  /* Base style */
+  background-color: var(--dark-bg);
+  border: 3px solid var(--accent);
+  border-radius: 10px; /* Rounded corners for modern look */
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* Hover effect */
+.checkbox-input:hover {
+  background-color: var(--darker-bg);
+  transform: scale(1.2);
+  box-shadow: 0 0 6px var(--text-primary);
+}
+
+/* Checked state */
+.checkbox-input:checked {
+  background-color: var(--accent);
+  /* color: var(--accent); */
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* Animated checkmark */
+.checkbox-input:checked::after {
+  content: "";
+  position: absolute;
+  top: 25%;
+  left: 35%;
+  width: 25%;
+  height: 50%;
+  border-right: 2px solid var(--dark-bg);
+  border-bottom: 2px solid var(--dark-bg);
+  transform: rotate(45deg);
+  transition: all 0.2s ease;
+}
 
 /* .container {
   width: 100%;

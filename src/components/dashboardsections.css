@@ -357,6 +357,18 @@
   color: var(--card-bg);
 
 }
+.history-actions{
+  /* background-color: red; */
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.checkbox-span{
+  width: 30px;
+  height: 30px;
+}
+
+
 
 .action-btn:nth-child(5):hover {
   color: var(--edited);

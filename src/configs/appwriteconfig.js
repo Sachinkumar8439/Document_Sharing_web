@@ -62,7 +62,7 @@ export const uploadFileForUser = async (file, permissionSettings = {},setline) =
       permissions,
       (uploadProgress) => {
       const percent = parseFloat(uploadProgress.progress.toFixed(2));
-      const adjusted = (percent / 100) * 100;
+      const adjusted = (percent / 100) * 99;
       setline(adjusted.toFixed(0));
       }
     );
@@ -211,6 +211,28 @@ export const listFilesForUser = async () => {
   }
 };
 
+export const deleteDocuments = async(docs,what='h',setline,userid)=> {
+  if(docs.length===0)return {success:false,message:"not document selected"}
+   let num = 1;
+   let did = historyId;
+   if(what === 'd') did = collectionId
+  await Promise.all(
+    docs.map(async (doc) => {
+      try {
+        await databases.deleteDocument(databaseId,did, doc.id);
+        await setline((num/docs.length)*100,true)
+        num++;
+        console.log("Deleted document:", doc.id);
+      } catch (error) {
+        console.error("Error deleting document:", doc, error);
+      }
+    })
+  );
+  console.log("All user documents deleted ✅");
+  return {success:true,message:"History Deleted"}
+
+}
+
 export const deleteFileForUser = async (fileId) => {
   try {
     const docs = await databases.listDocuments(
@@ -355,3 +377,4 @@ export const updatePassword = async (password, oldPassword) => {
     }
   }
 };
+
