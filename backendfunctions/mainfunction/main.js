@@ -12,9 +12,8 @@ const storage = new sdk.Storage(client);
 
 const databaseId = process.env.REACT_APP_APPWRITE_DATABASE_ID;
 const usercollectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID;
-const historycollectionId = process.env.REACT_APP_APPWRITE_HISTORY_COLLECTION_ID
+const historycollectionId = process.env.REACT_APP_APPWRITE_HISTORY_COLLECTION_ID;
 const bucketId = process.env.REACT_APP_APPWRITE_BUCKET_ID;
-
 
 // ===== CORS Headers =====
 const corsHeaders = {
@@ -27,14 +26,19 @@ const corsHeaders = {
 function handleCORS(req, res) {
   if (req.method === "OPTIONS") {
     res.send("", 204, corsHeaders);
-    return false; 
+    return false;
   }
   return true;
 }
 
 module.exports = async function ({ req, res, log }) {
   log("Function is running");
-  console.log("databaseid ",databaseId," usercolectionid ",usercollectionId," historycollectionid ",historycollectionId," bucketid ",bucketId)
+  console.log(
+    "databaseid ", databaseId,
+    " usercolectionid ", usercollectionId,
+    " historycollectionid ", historycollectionId,
+    " bucketid ", bucketId
+  );
 
   if (!handleCORS(req, res)) return;
 
@@ -42,11 +46,15 @@ module.exports = async function ({ req, res, log }) {
     const body = JSON.parse(req.bodyRaw || "{}");
     const { work, userId } = body;
 
-    console.log("body ",body);
-    console.log("work ",work," userid ",userId)
+    console.log("body ", body);
+    console.log("work ", work, " userid ", userId);
 
     if (!work || !userId) {
-      return res.json({ success: false, message: "Invalid execution" }, 400);
+      return res.json(
+        { success: false, message: "Invalid execution" },
+        400,
+        corsHeaders
+      );
     }
 
     switch (work) {
@@ -60,7 +68,7 @@ module.exports = async function ({ req, res, log }) {
         const files = await storage.listFiles(bucketId, [
           sdk.Query.equal("userId", userId),
         ]);
-        console.log("files " ,files)
+        console.log("files ", files);
         for (const file of files.files) {
           await storage.deleteFile(bucketId, file.$id);
         }
@@ -68,29 +76,45 @@ module.exports = async function ({ req, res, log }) {
         // Delete the user account
         await users.delete(userId);
 
-        return res.json({
-          success: true,
-          message: "Your Account and data have been deleted.",
-        });
+        return res.json(
+          {
+            success: true,
+            message: "Your Account and data have been deleted.",
+          },
+          200,
+          corsHeaders
+        );
 
       case "getData":
         const userDocs = await databases.listDocuments(databaseId, usercollectionId, [
           sdk.Query.equal("userId", userId),
         ]);
 
-        return res.json({
-          success: true,
-          data: userDocs.documents,
-        });
+        return res.json(
+          {
+            success: true,
+            data: userDocs.documents,
+          },
+          200,
+          corsHeaders
+        );
 
       default:
-        return res.json({
-          success: false,
-          message: `who are you bludy hell`,
-        }, 400);
+        return res.json(
+          {
+            success: false,
+            message: `who are you bludy hell`,
+          },
+          400,
+          corsHeaders
+        );
     }
   } catch (err) {
     log("Error: " + err.message);
-    return res.json({ success: false, error: err.message }, 500);
+    return res.json(
+      { success: false, error: err.message },
+      500,
+      corsHeaders
+    );
   }
 };
