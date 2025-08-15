@@ -142,10 +142,13 @@
 .documents-container h2 {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0rem;
   color: var(--text-primary);
 }
+.subtitle{
+  border-bottom: 2px solid var(--accent);
 
+}
 .documents-subtitle {
   color: var(--text-secondary);
   /* margin-bottom: 2rem; */
@@ -190,6 +193,7 @@
 }
 
 .document-item {
+  user-select: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -199,6 +203,7 @@
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-speed);
   border: 1px solid transparent;
+  overflow-x: hidden;
 }
 
 .document-item:hover {
@@ -249,12 +254,14 @@
 }
 
 .document-name {
+  flex: 1;
   font-weight: 600;
   font-size: 1.1rem;
   color: var(--text-primary);
   margin-bottom: 0px;
   white-space: nowrap;
-  max-width: 100%;
+  /* max-width: 100%; */
+  /* width: 100%; */
   padding-right: 20px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -263,7 +270,7 @@
 
 .document-meta {
   display: flex;
-  gap: 15px;
+  gap: 5px;
   flex-wrap: wrap;
   align-items: center;
   font-size: 0.8rem;
@@ -274,21 +281,27 @@
 .document-size {
   display: flex;
   align-items: center;
-  gap: 0rem;
+  /* gap: 0rem; */
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.7rem;
 }
 
 .meta-icon {
   font-size: 0.7rem;
   margin-right: 5px;
 }
-
 .document-actions {
+  /* width: 10%; */
   display: flex;
-  gap: 8px;
+  justify-content: flex-end;
+}
+.action-div{
+  display: flex;
+  align-items: center;
+  gap: 15px;
   flex-shrink: 0;
   flex-wrap: wrap;
+  /* align-items: end; */
 }
 
 .action-btn {
@@ -449,6 +462,7 @@
   background-color: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
+
 .action-icon.uploaded {
   color: var(--uploaded);
 }
@@ -483,6 +497,7 @@
   font-size: 0.8rem;
   color: var(--text-secondary);
 }
+
 
 .history-item-time {
   display: flex;
@@ -1241,6 +1256,12 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 600px) {
+  .action-btn{
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    min-height: 26px;
+  }
   .user-sessions-modal {
     max-height: 90vh;
   }
@@ -1294,7 +1315,7 @@ input:checked + .slider:before {
   
   .document-actions {
     width: 100%;
-    justify-content: center;
+    /* justify-content: center; */
   }
   
   .setting-item {
@@ -1344,7 +1365,7 @@ input:checked + .slider:before {
   }
   
   .document-meta {
-    flex-direction: column;
+    /* flex-direction: column; */
     align-items: flex-start;
     gap: 0.5rem;
   }

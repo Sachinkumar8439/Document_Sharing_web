@@ -88,7 +88,7 @@ const Profile = () => {
   return (
     <div className="documents-container dashboardsection-container">
       <h2>User Profile</h2>
-      <p className="profile-subtitle">Manage your account settings</p>
+      <p className="profile-subtitle subtitle">Manage your account settings</p>
 
       <div className="profile-card">
         <div className="profile-header">

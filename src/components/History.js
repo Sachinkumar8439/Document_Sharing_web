@@ -59,15 +59,15 @@ const History = () => {
       tag === "input" ||
       e.target.closest(".history-actions")
     ) {
-      return; 
+      return;
     }
     startTimeRef.current = Date.now();
     timerRef.current = setInterval(() => {
       const elapsed = Date.now() - startTimeRef.current;
       setDuration(elapsed);
 
-      if (elapsed >= 800) {
-        clearInterval(timerRef.current); 
+      if (elapsed >= 1000) {
+        clearInterval(timerRef.current);
         setcheckboxvisible(true);
         setisditing(true);
         addindeletelist(id);
@@ -90,8 +90,7 @@ const History = () => {
       prev.map((one) => (one.id === id ? { ...one, selected: false } : one))
     );
   };
-  useEffect(() => {
-  }, [finaldeletelist]);
+  useEffect(() => {}, [finaldeletelist]);
 
   useEffect(() => {
     if (deletelist?.length) {
@@ -113,57 +112,61 @@ const History = () => {
   }, [history]);
 
   const handleeditingcancel = (e) => {
-    if(e) e.preventDefault();
+    if (e) e.preventDefault();
     resetdeletelist();
     setisditing(false);
     setcheckboxvisible(false);
   };
   const handledeletehistory = async (id) => {
-    if (finaldeletelist.length === 0 && !id) {
-      showToast.error("select atleast one to delete");
-      return;
-    }
     if (id) {
       const isconfirm = await showConfirmation(
-          "Are you sure ?",
-          "we ensure you carefully choose to delete it if action is deleted then you can not backup this file ."
-        );
-        if (!isconfirm) return;
-      const response = await deleteDocuments([{id:id,selected:true}], "h", setline);
+        "Are you sure ?",
+        "we ensure you carefully choose to delete it if action is deleted then you can not backup this file ."
+      );
+      if (!isconfirm) return;
+      const response = await deleteDocuments(
+        [{ id: id, selected: true }],
+        "h",
+        setline
+      );
       if (response.success) {
         sethistory((pre) => pre.filter((doc) => doc.id !== id));
         showToast.success("history deleted succesfully");
-        handleeditingcancel()
+        handleeditingcancel();
         setline(0);
         return;
       } else {
-        const isconfirm = await showConfirmation(
-          "Are you sure ?",
-          "your cant rollback your deleted file if history is deleted"
-        );
-        if (!isconfirm) return;
         showToast.error(response.message);
-        handleeditingcancel()
+        handleeditingcancel();
         setline(0);
         return;
       }
     }
+    if (finaldeletelist?.length === 0) {
+      showToast.error("select atleast one to delete");
+      return;
+    }
+    const isconfirm = await showConfirmation(
+      "Are you sure ?",
+      "your cant rollback your deleted file if history is deleted"
+    );
+    if (!isconfirm) return;
     const response = await deleteDocuments(finaldeletelist, "h", setline);
     if (response.success) {
       sethistory((pre) =>
         pre?.filter((his) => !finaldeletelist.some((doc) => doc.id === his.id))
       );
       showToast.success(response.message);
-      handleeditingcancel()
+      handleeditingcancel();
       setline(0);
       return;
     } else {
       showToast.error(response.message);
-      handleeditingcancel()
+      handleeditingcancel();
     }
 
     setline(0);
-    handleeditingcancel()
+    handleeditingcancel();
   };
 
   return (
@@ -226,7 +229,7 @@ const History = () => {
           </button>
         </div>
       ) : (
-        <p className="documents-subtitle">
+        <p className="documents-subtitle subtitle">
           Recent activities on your documents
         </p>
       )}
@@ -278,35 +281,39 @@ const History = () => {
                 </div>
               </div>
             </div>
-            <div className="history-actions">
-              {checkboxvisible && (
-                <span className="checkbox-span">
-                  <input
-                    checked={deletelist[index].selected}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      if (e.target.checked) {
-                        addindeletelist(item.id);
-                      } else {
-                        removefromdeletelist(item.id);
-                      }
-                    }}
-                    className="checkbox-input"
-                    type="checkbox"
-                  />
-                </span>
-              )}
-              <button
-                className="action-btn"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handledeletehistory(item.id)
-                }
-                }
-                title="Delete"
-              >
-                <FaTrash />
-              </button>
+            <div className="document-actions">
+              <div className="action-div">
+                {checkboxvisible && (
+                  <>
+                    <span className="checkbox-span">
+                      <input
+                        checked={deletelist[index].selected}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          if (e.target.checked) {
+                            addindeletelist(item.id);
+                          } else {
+                            removefromdeletelist(item.id);
+                          }
+                        }}
+                        className="checkbox-input"
+                        type="checkbox"
+                      />
+                    </span>
+                  </>
+                )}
+
+                <button
+                  className="action-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handledeletehistory(item.id);
+                  }}
+                  title="Delete"
+                >
+                  <FaTrash />
+                </button>
+              </div>
             </div>
           </div>
         ))}

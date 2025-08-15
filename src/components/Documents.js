@@ -168,7 +168,7 @@ export default function Documents() {
   return (
     <div className="documents-container dashboardsection-container">
       <h2>Your Documents</h2>
-      <p className="documents-subtitle">All your saved documents</p>
+      <p className="documents-subtitle subtitle">All your saved documents</p>
 
       <div className="search-container">
         <input
@@ -217,6 +217,8 @@ export default function Documents() {
             </div>
 
             <div className="document-actions">
+            <div className="action-div">
+
               <button
                 className="action-btn copylink-btn"
                 onClick={() => handlecopy(doc.id)}
@@ -242,23 +244,24 @@ export default function Documents() {
                 className="action-btn download-btn"
                 onClick={() => handleDownloadDocument(doc.id)}
                 title="Download"
-              >
+                >
                 <FaDownload />
               </button>
               <button
                 className="action-btn"
                 onClick={() => handleEditDocument(doc.id)}
                 title="Edit"
-              >
+                >
                 <FaEdit />
               </button>
               <button
                 className="action-btn"
                 onClick={() => handleDeleteDocument(doc)}
                 title="Delete"
-              >
+                >
                 <FaTrash />
               </button>
+                </div>
             </div>
           </div>
         ))}

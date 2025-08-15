@@ -174,7 +174,7 @@ const Settings = () => {
         <UserSessionsModal onClose={() => setisshowsession(false)} />
       )}
       <h2>Settings</h2>
-      <p className="settings-subtitle">
+      <p className="settings-subtitle subtitle">
         Configure your application preferences
       </p>
 
@@ -372,8 +372,8 @@ const Settings = () => {
               </div>
               <div className="storage-details">
                 <span>
-                  {bytesToMB(storage)}MB of 50 MB used [{" "}
-                  {(bytesToMB(storage) / 50) * 100}% ]
+                  {bytesToMB(storage)}MB of 50MB used [{""}
+                  {(bytesToMB(storage) / 50) * 100}%]
                 </span>
                 <button className="upgrade-btn">
                   <FaArrowUp /> Upgrade
