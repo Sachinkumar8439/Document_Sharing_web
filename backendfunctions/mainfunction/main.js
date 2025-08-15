@@ -1,6 +1,5 @@
 const sdk = require("node-appwrite");
 
-// ===== Initialize Appwrite Client =====
 const client = new sdk.Client()
   .setEndpoint(process.env.REACT_APP_APPWRITE_ENDPOINT)
   .setProject(process.env.REACT_APP_APPWRITE_PROJECT_ID)
@@ -15,35 +14,27 @@ const usercollectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID;
 const historycollectionId = process.env.REACT_APP_APPWRITE_HISTORY_COLLECTION_ID;
 const bucketId = process.env.REACT_APP_APPWRITE_BUCKET_ID;
 
-// ===== CORS Headers =====
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-};
-
-// ===== CORS Middleware =====
-function handleCORS(req, res) {
-  if (req.method === "OPTIONS") {
-    res.send("", 204, corsHeaders);
-    return false;
-  }
-  return true;
-}
-
 module.exports = async function ({ req, res, log }) {
   log("Function is running");
-  console.log(
+   console.log(
     "databaseid ", databaseId,
     " usercolectionid ", usercollectionId,
     " historycollectionid ", historycollectionId,
     " bucketid ", bucketId
   );
 
-  if (!handleCORS(req, res)) return;
+  // Handle preflight request
+  if (req.method === "OPTIONS") {
+    return res.send("", 204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    });
+  }
+  const corsHeaders = {"Access-Control-Allow-Origin": "*" }
 
   try {
-    const body = JSON.parse(req.bodyRaw || "{}");
+ const body = JSON.parse(req.bodyRaw || "{}");
     const { work, userId } = body;
 
     console.log("body ", body);
