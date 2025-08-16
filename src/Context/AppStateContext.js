@@ -59,6 +59,7 @@ export const AppStateProvider = ({ children }) => {
     show: false,
     heading:'',
     message: '',
+    name:'',
     resolve: null
   });
   // 3,5,6,7,11
@@ -80,12 +81,13 @@ export const AppStateProvider = ({ children }) => {
 
 
 
-  const showConfirmation = (heading ,message) => {
+  const showConfirmation = (heading ,message,name) => {
     return new Promise((resolve) => {
       setConfirmationState({
         show: true,
         heading,
         message,
+        name,
         resolve
       });
     });
@@ -220,6 +222,11 @@ export const AppStateProvider = ({ children }) => {
           <div className="confirmation-box">
             <h2>{confirmationState.heading}</h2>
             <p>{confirmationState.message}</p>
+            <span style={{color:"var(--accent)"}}><input onClick={(e)=>{
+              console.log(e.target.checked);
+              if(e.target.checked)localStorage.setItem(confirmationState.name,e.target.checked)
+                else localStorage.removeItem(confirmationState.name);
+            }} style={{cursor:"pointer"}} type='checkbox'/>dont show popup Again</span>
             <div className="confirmation-buttons">
               <button className="cancel-btn" onClick={handleCancel}>
                 <FaTimes /> Cancel

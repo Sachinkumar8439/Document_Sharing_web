@@ -98,8 +98,10 @@ export default function Documents() {
     // alert(`Editing document: ${doc.name}`);
   };
   const handleDeleteDocument = async (doc) => {
-    const isconfirm = await showConfirmation("Deleting the docuement");
-    if (!isconfirm) return;
+    if(!localStorage.getItem("isshowonedocumentdeletepopup")){
+      const isconfirm = await showConfirmation("Are you sure ?","this document may be important","isshowonedocumentdeletepopup");
+      if (!isconfirm) return;
+    }
     await setline(60, true);
     const response = await deleteFileForUser(doc.id);
     if (response.success) {

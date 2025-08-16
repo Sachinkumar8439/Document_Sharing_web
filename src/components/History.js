@@ -121,11 +121,16 @@ const History = () => {
   };
   const handledeletehistory = async (id) => {
     if (id) {
-      const isconfirm = await showConfirmation(
-        "Are you sure ?",
-        "we ensure you carefully choose to delete it if action is deleted then you can not backup this file ."
-      );
-      if (!isconfirm) return;
+      if(!localStorage.getItem("isshowonedeletehistorypopup")){
+
+        const isconfirm = await showConfirmation(
+          "Are you sure ?",
+          "we ensure you carefully choose to delete it if action is deleted then you can not backup this file .",
+          "isshowonedeletehistorypopup"
+        );
+        if (!isconfirm) return;
+      }
+      setline(90,true)
       const response = await deleteDocuments(
         [{ id: id, selected: true }],
         "h",
@@ -148,11 +153,15 @@ const History = () => {
       showToast.error("select atleast one to delete");
       return;
     }
-    const isconfirm = await showConfirmation(
-      "Are you sure ?",
-      "your cant rollback your deleted file if history is deleted"
-    );
-    if (!isconfirm) return;
+    if(!localStorage.getItem("isshowmultipledeletehistorypopup")){
+
+      const isconfirm = await showConfirmation(
+        "Are you sure ?",
+        "your cant rollback your deleted file if history is deleted",
+        "isshowmultipledeletehistorypopup"
+      );
+      if (!isconfirm) return;
+    }
     const response = await deleteDocuments(finaldeletelist, "h", setline);
     if (response.success) {
       sethistory((pre) =>

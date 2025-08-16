@@ -46,12 +46,16 @@ const Settings = () => {
 
   const logout = async (e) => {
     e.preventDefault();
-    if (
-      !(await showConfirmation("Are you sure ?",
-        "Your session on this device will be deleted you can login again any time"
-      ))
-    ) {
-      return;
+    if(!localStorage.getItem("isshowlogoutpopup")){
+      if (
+        !(await showConfirmation("Are you sure ?",
+          "Your session on this device will be deleted you can login again any time",
+          "isshowlogoutpopup"
+        ))
+      ) {
+        return;
+      }
+
     }
     try {
       await setline(90, true);
