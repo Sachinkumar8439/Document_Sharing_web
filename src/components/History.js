@@ -17,6 +17,7 @@ import { useAppState } from "../Context/AppStateContext";
 import { getFileIcon } from "../utility/util";
 import { deleteDocuments } from "../configs/appwriteconfig";
 import NoticePage from "../pages/noticepage";
+import { BASE_URL } from "../Auth/appwriteauth";
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp);
@@ -247,77 +248,93 @@ const History = () => {
             Loading history...
           </div>
         )}
-        {history.length ===0 ? <NoticePage heading="NO HISTORY YET !" description={"Learn about how history works. it will be benificial for you"} links={[{redirecturl:"https://docsavemini.vercel.app",text:"History Documentation"}]}  /> : history?.map((item, index) => (
-          <div
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              if (checkboxvisible) return;
-              handlePressStart(e, item.id);
-            }}
-            onMouseUp={handlePressEnd}
-            // onMouseLeave={handlePressEnd}
-            onTouchStart={(e) => {
-              if (checkboxvisible) return;
-              e.stopPropagation();
-              handlePressStart(e, item.id);
-            }}
-            onTouchEnd={handlePressEnd}
-            key={item.id}
-            id={item.id}
-            className="document-item"
-          >
-            <div className="document-info">
-              {getFileIcon(item.name, item.fileType)}
-              <div className="document-details">
-                <div className="document-name">{item.name}</div>
-                <div className="document-meta">
-                  <span className="document-date">
-                    <FaCalendarAlt className="meta-icon" />
-                    {formatDate(item.timestamp)} at {formatTime(item.timestamp)}
-                  </span>
-                  <span className="document-size">
-                    {/* <FaClock className="meta-icon" /> */}
-                    {item.action}
-                  </span>
+        {history.length === 0 ? (
+          <NoticePage
+            heading="NO HISTORY YET !"
+            description={
+              "Learn about how history works. it will be benificial for you"
+            }
+            links={[
+              {
+                redirecturl: `${BASE_URL}/documentation#version-history`,
+                text: "History Documentation",
+              },
+            ]}
+          />
+        ) : (
+          history?.map((item, index) => (
+            <div
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                if (checkboxvisible) return;
+                handlePressStart(e, item.id);
+              }}
+              onMouseUp={handlePressEnd}
+              // onMouseLeave={handlePressEnd}
+              onTouchStart={(e) => {
+                if (checkboxvisible) return;
+                e.stopPropagation();
+                handlePressStart(e, item.id);
+              }}
+              onTouchEnd={handlePressEnd}
+              key={item.id}
+              id={item.id}
+              className="document-item"
+            >
+              <div className="document-info">
+                {getFileIcon(item.name, item.fileType)}
+                <div className="document-details">
+                  <div className="document-name">{item.name}</div>
+                  <div className="document-meta">
+                    <span className="document-date">
+                      <FaCalendarAlt className="meta-icon" />
+                      {formatDate(item.timestamp)} at{" "}
+                      {formatTime(item.timestamp)}
+                    </span>
+                    <span className="document-size">
+                      {/* <FaClock className="meta-icon" /> */}
+                      {item.action}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="document-actions">
+                <div className="action-div">
+                  {checkboxvisible && (
+                    <>
+                      <span className="checkbox-span">
+                        <input
+                          checked={deletelist[index].selected}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            if (e.target.checked) {
+                              addindeletelist(item.id);
+                            } else {
+                              removefromdeletelist(item.id);
+                            }
+                          }}
+                          className="checkbox-input"
+                          type="checkbox"
+                        />
+                      </span>
+                    </>
+                  )}
+
+                  <button
+                    className="action-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handledeletehistory(item.id);
+                    }}
+                    title="Delete"
+                  >
+                    <FaTrash />
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="document-actions">
-              <div className="action-div">
-                {checkboxvisible && (
-                  <>
-                    <span className="checkbox-span">
-                      <input
-                        checked={deletelist[index].selected}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          if (e.target.checked) {
-                            addindeletelist(item.id);
-                          } else {
-                            removefromdeletelist(item.id);
-                          }
-                        }}
-                        className="checkbox-input"
-                        type="checkbox"
-                      />
-                    </span>
-                  </>
-                )}
-
-                <button
-                  className="action-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handledeletehistory(item.id);
-                  }}
-                  title="Delete"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

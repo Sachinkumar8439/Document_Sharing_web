@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome, faUser, faCogs, faEnvelope, faBars,faLogin } from "@fortawesome/free-solid-svg-icons";
-// import "../components/Navbar.css"
 import "../pages/landingpage.css"
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,29 +14,29 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <a href="#" className="navbar-logo">
+        <span className="navbar-logo">
            D-OCSAVE
-        </a>
+        </span>
         <ul className={`navbar-menu ${isMobileMenuOpen ? "active" : ""}`}>
           <li>
-            <a href="#home">
+            <Link to={'/'} href="#home">
               <FontAwesomeIcon icon={faHome} /> Home
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#services">
+            <Link to={'/services'} href="#services">
               <FontAwesomeIcon icon={faCogs} /> Services
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#contact">
+            <Link to={'/contact'} href="#contact">
               <FontAwesomeIcon icon={faEnvelope} /> Contact
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="/signin">
+            <Link to={'signin'} >
               <FontAwesomeIcon icon={faUser} /> Login
-            </a>
+            </Link>
           </li>
         </ul>
         <div className="navbar-toggle" onClick={toggleMobileMenu}>

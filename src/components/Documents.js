@@ -24,6 +24,7 @@ import { useAuthState } from "../Context/Authcontext";
 import { runhtml, getFileIcon } from "../utility/util";
 import NoticePage from "../pages/noticepage";
 import { Links, redirect } from "react-router-dom";
+import { BASE_URL } from "../Auth/appwriteauth";
 
 export const formatDate = (isoDate) => {
   const date = new Date(isoDate);
@@ -213,7 +214,7 @@ export default function Documents() {
             description={"Learn about docuements/types avaialable and there SECURITY PERMISSIONS"}
             links={[
               {
-                redirecturl: "https://docsavemini.vercel.app",
+                redirecturl: `${BASE_URL}/documentation`,
                 text: "Documentation",
               },
             ]}

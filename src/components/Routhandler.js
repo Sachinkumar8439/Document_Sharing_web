@@ -8,11 +8,11 @@ const RouteHandler = ({routes}) => {
   return (
     <React.Suspense fallback={<Loading/>}>
       <Routes>
-        {routes.map(({ path, component: Component, isvalid,direct }) => (
+        {routes.map(({ path, component: Component, isvalid,direct,props }) => (
           <Route
             key={path}
             path={path}
-            element={isvalid ? <Component /> : <Navigate to={direct} />}
+            element={isvalid ? <Component props={props} /> : <Navigate to={direct} />}
           />
         ))}
         <Route path="*" element={<Navigate to="/" />} />

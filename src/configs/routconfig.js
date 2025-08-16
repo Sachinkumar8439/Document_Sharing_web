@@ -1,11 +1,14 @@
 // routes.js
 import React from "react";
+import { sections, footerData } from "../data";
 const SignupForm = React.lazy(()=>import("../components/WithEmail")) 
 const LandingPage = React.lazy(() => import("../pages/LandingPage"));
 const LoginForm = React.lazy(() => import("../pages/LoginPage"));
 const Dashboard = React.lazy(() => import("../pages/DashboardPage"));
 const Verify = React.lazy(() => import("../pages/verify"));
 const ResetPasswordForm  = React.lazy(() => import("../pages/resetpassword"));
+const DocumentationComponent  = React.lazy(() => import("../pages/DocumentationComponent"));
+const contactpage  = React.lazy(() => import("../pages/contactpage"));
 const setRoutes = async (user)=>{
     const routes = [
   {
@@ -41,6 +44,19 @@ const setRoutes = async (user)=>{
     {
         path: "/reset-password",
         component: ResetPasswordForm,
+        isvalid: true,
+        direct:"/" 
+    },
+    {
+        path: "/documentation",
+        component: DocumentationComponent,
+        props:{sections,footerData},
+        isvalid: true,
+        direct:"/" 
+    },
+    {
+        path: "/contact",
+        component: contactpage,
         isvalid: true,
         direct:"/" 
     },
