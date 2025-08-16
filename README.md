@@ -18,6 +18,8 @@
 ![App Screenshot](images/operations.JPG)
 # 9. settings
 ![App Screenshot](images/settings.JPG)
+# 10. notice
+![App Screenshot](images/notice.JPG)
 
 A secure, responsive document sharing platform with user authentication, file management, and sharing capabilities. Built with React.js and Appwrite backend.
 

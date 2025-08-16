@@ -16,6 +16,7 @@ import {
 import { useAppState } from "../Context/AppStateContext";
 import { getFileIcon } from "../utility/util";
 import { deleteDocuments } from "../configs/appwriteconfig";
+import NoticePage from "../pages/noticepage";
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp);
@@ -66,7 +67,7 @@ const History = () => {
       const elapsed = Date.now() - startTimeRef.current;
       setDuration(elapsed);
 
-      if (elapsed >= 1000) {
+      if (elapsed >= 800) {
         clearInterval(timerRef.current);
         setcheckboxvisible(true);
         setisditing(true);
@@ -246,7 +247,7 @@ const History = () => {
             Loading history...
           </div>
         )}
-        {history?.map((item, index) => (
+        {history.length ===0 ? <NoticePage heading="NO HISTORY YET !" description={"Learn about how history works. it will be benificial for you"} links={[{redirecturl:"https://docsavemini.vercel.app",text:"History Documentation"}]}  /> : history?.map((item, index) => (
           <div
             onMouseDown={(e) => {
               e.stopPropagation();

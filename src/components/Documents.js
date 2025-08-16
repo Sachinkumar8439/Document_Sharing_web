@@ -21,7 +21,9 @@ import {
   getFilePreview,
 } from "../configs/appwriteconfig";
 import { useAuthState } from "../Context/Authcontext";
-import { runhtml,getFileIcon } from "../utility/util";
+import { runhtml, getFileIcon } from "../utility/util";
+import NoticePage from "../pages/noticepage";
+import { Links, redirect } from "react-router-dom";
 
 export const formatDate = (isoDate) => {
   const date = new Date(isoDate);
@@ -40,25 +42,24 @@ export default function Documents() {
     useAppState();
   const { user } = useAuthState();
   const [searchQuery, setSearchQuery] = useState("");
-  const [iscopied,setiscopied] = useState(true);
+  const [iscopied, setiscopied] = useState(true);
 
-  const setcopy = (duration=3000)=>{
-   setiscopied(false)
-  setTimeout(() => {
-    setiscopied(true)   
-   }, duration || 3000);
-
-  }
+  const setcopy = (duration = 3000) => {
+    setiscopied(false);
+    setTimeout(() => {
+      setiscopied(true);
+    }, duration || 3000);
+  };
 
   const handleOpenDocument = async (doc) => {
     const response = await getFilePreview(doc.id);
     if (response.success) {
-     if (doc.fileType === "text/html") {
-         const res = await runhtml(response.url,doc)
-         if(!res.success){
-             showToast.error(res.message);
-         }
-         return;
+      if (doc.fileType === "text/html") {
+        const res = await runhtml(response.url, doc);
+        if (!res.success) {
+          showToast.error(res.message);
+        }
+        return;
       }
       const a = document.createElement("a");
       a.href = response.url;
@@ -131,8 +132,9 @@ export default function Documents() {
             text: `${user.name} shared a file ${doc.fileSize}`,
             url: url,
           })
-          .then(() =>{
-             console.log("✅ Shared successfully")})
+          .then(() => {
+            console.log("✅ Shared successfully");
+          })
           .catch((error) => {
             showToast.error(error.message);
             console.error("❌ Error sharing", error);
@@ -148,22 +150,19 @@ export default function Documents() {
   const filteredDocuments = files?.filter((doc) =>
     doc.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const handlecopy = async (id)=>{
-
+  const handlecopy = async (id) => {
     const response = await getFilePreview(id);
     if (response.success) {
-      if(navigator.clipboard){
-        await navigator.clipboard.writeText(response.url)
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(response.url);
         setcopy();
-
-      }else{
-        showToast.error("clipboard not supported copy")
+      } else {
+        showToast.error("clipboard not supported copy");
       }
     } else {
       showToast.error(response.message);
     }
-
-  }
+  };
 
   return (
     <div className="documents-container dashboardsection-container">
@@ -194,77 +193,103 @@ export default function Documents() {
             loading...
           </div>
         )}
-            {!iscopied && <p style={{ outline:"2px solid white", position:"fixed",top:"10px",right:"20px",padding:"5px",borderRadius:"2px"}}>copied</p>}
-        {filteredDocuments?.map((doc) => (
-          <div key={doc.id} className="document-item">
-            <div className="document-info">
-              {getFileIcon(doc.name, doc.fileType)}
-              <div className="document-details">
-                <div className="document-name">{doc.name}</div>
-                <div className="document-meta">
-                  <span className="document-date">
-                    <FaCalendarAlt className="meta-icon" />
-                    {formatDate(doc.uploadedAt)}
-                  <span style={{paddingLeft:"5px"}}>{doc.isPublic?<FaGlobe/>:""}</span>
-                  </span>
-                  <span className="document-size">
-                    <FaDatabase className="meta-icon" />
-                    {formatBytes(doc.fileSize)}
-                    
-                  </span>
+        {!iscopied && (
+          <p
+            style={{
+              outline: "2px solid white",
+              position: "fixed",
+              top: "10px",
+              right: "20px",
+              padding: "5px",
+              borderRadius: "2px",
+            }}
+          >
+            copied
+          </p>
+        )}
+        {filteredDocuments.length === 0 ? (
+          <NoticePage
+            heading="NO DOCUMENT YET!"
+            description={"Learn about docuements/types avaialable and there SECURITY PERMISSIONS"}
+            links={[
+              {
+                redirecturl: "https://docsavemini.vercel.app",
+                text: "Documentation",
+              },
+            ]}
+          />
+        ) : (
+          filteredDocuments?.map((doc) => (
+            <div key={doc.id} className="document-item">
+              <div className="document-info">
+                {getFileIcon(doc.name, doc.fileType)}
+                <div className="document-details">
+                  <div className="document-name">{doc.name}</div>
+                  <div className="document-meta">
+                    <span className="document-date">
+                      <FaCalendarAlt className="meta-icon" />
+                      {formatDate(doc.uploadedAt)}
+                      <span style={{ paddingLeft: "5px" }}>
+                        {doc.isPublic ? <FaGlobe /> : ""}
+                      </span>
+                    </span>
+                    <span className="document-size">
+                      <FaDatabase className="meta-icon" />
+                      {formatBytes(doc.fileSize)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="document-actions">
+                <div className="action-div">
+                  <button
+                    className="action-btn copylink-btn"
+                    onClick={() => handlecopy(doc.id)}
+                    title="copy link to share docuement"
+                  >
+                    <FaCopy />
+                  </button>
+                  <button
+                    className="action-btn share-btn"
+                    onClick={() => handleShareDocument(doc)}
+                    title="share document"
+                  >
+                    <FaShare />
+                  </button>
+                  <button
+                    className="action-btn open-btn"
+                    onClick={() => handleOpenDocument(doc)}
+                    title="Open"
+                  >
+                    <FaFolderOpen />
+                  </button>
+                  <button
+                    className="action-btn download-btn"
+                    onClick={() => handleDownloadDocument(doc.id)}
+                    title="Download"
+                  >
+                    <FaDownload />
+                  </button>
+                  <button
+                    className="action-btn"
+                    onClick={() => handleEditDocument(doc.id)}
+                    title="Edit"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    className="action-btn"
+                    onClick={() => handleDeleteDocument(doc)}
+                    title="Delete"
+                  >
+                    <FaTrash />
+                  </button>
                 </div>
               </div>
             </div>
-
-            <div className="document-actions">
-            <div className="action-div">
-
-              <button
-                className="action-btn copylink-btn"
-                onClick={() => handlecopy(doc.id)}
-                title="copy link to share docuement"
-              >
-                <FaCopy />
-              </button>
-              <button
-                className="action-btn share-btn"
-                onClick={() => handleShareDocument(doc)}
-                title="share document"
-              >
-                <FaShare />
-              </button>
-              <button
-                className="action-btn open-btn"
-                onClick={() => handleOpenDocument(doc)}
-                title="Open"
-              >
-                <FaFolderOpen />
-              </button>
-              <button
-                className="action-btn download-btn"
-                onClick={() => handleDownloadDocument(doc.id)}
-                title="Download"
-                >
-                <FaDownload />
-              </button>
-              <button
-                className="action-btn"
-                onClick={() => handleEditDocument(doc.id)}
-                title="Edit"
-                >
-                <FaEdit />
-              </button>
-              <button
-                className="action-btn"
-                onClick={() => handleDeleteDocument(doc)}
-                title="Delete"
-                >
-                <FaTrash />
-              </button>
-                </div>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
