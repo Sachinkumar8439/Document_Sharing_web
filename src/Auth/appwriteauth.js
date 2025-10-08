@@ -1,18 +1,88 @@
-import { Client, Account, ID } from "appwrite";
-
+import { Client, Account, ID ,Storage, Databases, Query, Permission, Role } from "appwrite";
+import { hashPassword } from "../utility/util";
 export const client = new Client()
-  .setEndpoint(process.env.REACT_APP_APPWRITE_ENDPOINT)
-  .setProject(process.env.REACT_APP_APPWRITE_PROJECT_ID);
-  let account
+.setEndpoint(process.env.REACT_APP_APPWRITE_ENDPOINT)
+.setProject(process.env.REACT_APP_APPWRITE_PROJECT_ID);
+let account
 try {
-   account = new Account(client);
+  account = new Account(client);
   
 } catch (error) {
-    // console.log(error)
+  // console.log(error)
 }
+const storage = new Storage(client);
+const databases = new Databases(client);
+const bucketId = process.env.REACT_APP_APPWRITE_BUCKET_ID;
+const databaseId = process.env.REACT_APP_APPWRITE_DATABASE_ID;
+const collectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID;
+const historyId = process.env.REACT_APP_APPWRITE_HISTORY_COLLECTION_ID;
+const userCollectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID
 const domain = process.env.REACT_APP_VERCEL_PROJECT_PRODUCTION_URL || "localhost:3000"
 export const BASE_URL = `https://${domain}`;
 console.log("this is base url",BASE_URL);
+
+export const finduser = async(data={})=>{
+  console.log("data in finduser", data);
+
+  try {
+    const field = data.email ? "email" : "phone";
+    const value = data.email || data.phone;
+    const res = await databases.listDocuments(
+    databaseId,
+    userCollectionId,
+    [Query.equal(field,value)]
+  );
+  console.log("response of geting user")
+  if (res.documents.length > 0) {
+    console.log("✅ Found user:", res.documents[0]);
+    return {success:true,users:res.documents,message:"User Found"};
+  } else {
+    console.log("⚠️ No user found with this email");
+    return {success:false,message:"No user found with this email"};
+  }  
+    
+  } catch (error) {
+    return {success:false,message:error.message}
+    
+  }
+  
+
+
+}
+
+export const addusertodb = async(user,password)=>{
+  const hashedpassword = await hashPassword(password);
+   try {
+     const response =  await databases.createDocument(
+      databaseId,
+      userCollectionId,
+      user.$id, 
+      {
+        name:user.email.split("@")[0],
+        email:user.email,
+        phone:user.phone,
+        image:null,
+        encpasswords:[],
+        password:hashedpassword,
+        publicpassword:hashedpassword,
+      },
+      [
+        Permission.read(Role.user(user.$id)),
+        Permission.write(Role.user(user.$id)),
+        Permission.update(Role.user(user.$id)),
+        Permission.delete(Role.user(user.$id)),
+      ]
+    );
+    return {success:true,data:response,message:"Successfully added to user"};
+    
+  } catch (error) {
+    console.error(error.message);
+    return {success:false,message:error.message};
+    
+  }
+
+
+}
 
 export const appwriteAuth = {
 async sendAndVerifyPhone(phone,password) {
@@ -111,6 +181,8 @@ async signUp(email, password,phone) {
     const res = await this.sendemailverification(email, password);
 
     if (res.success) {
+      const userindb  = await addusertodb(user,password);
+      console.log("userin db",userindb)
       const response = await this.sendAndVerifyPhone();
       if(response.success){
         return{ success:true,message:"verification email Link and Phone OTP sent Successfully verify them"}

@@ -60,6 +60,12 @@ export const AppStateProvider = ({ children }) => {
     heading:'',
     message: '',
     name:'',
+    isinput:false,
+    input:{
+      type:"text",
+      value:"",
+      placeholder:"Enter here .."
+    },
     resolve: null
   });
   // 3,5,6,7,11
@@ -81,26 +87,32 @@ export const AppStateProvider = ({ children }) => {
 
 
 
-  const showConfirmation = (heading ,message,name) => {
+  const showConfirmation = (heading ,message,name,isinput,type,placeholder) => {
     return new Promise((resolve) => {
       setConfirmationState({
         show: true,
         heading,
         message,
         name,
+        isinput,
+        input:{
+          type,
+          placeholder,
+          value:""
+        },
         resolve
       });
     });
   };
 
   const handleConfirm = () => {
-    confirmationState.resolve(true);
-    setConfirmationState({ ...confirmationState, show: false });
+    confirmationState.resolve(confirmationState.isinput? confirmationState.input.value:true);
+    setConfirmationState({ ...confirmationState, show: false,isinput:false ,message:"",heading:"",input:{type:"text",value:"",placeholder:"Enter here .."}});
   };
 
   const handleCancel = () => {
     confirmationState.resolve(false);
-    setConfirmationState({ ...confirmationState, show: false });
+    setConfirmationState({ ...confirmationState, show: false,message:"", heading:"",input:{type:"text",value:"",placeholder:"Enter here .."} });
   };
 
   
@@ -222,11 +234,27 @@ export const AppStateProvider = ({ children }) => {
           <div className="confirmation-box">
             <h2>{confirmationState.heading}</h2>
             <p>{confirmationState.message}</p>
-            <span style={{color:"var(--accent)"}}><input onClick={(e)=>{
-              console.log(e.target.checked);
-              if(e.target.checked)localStorage.setItem(confirmationState.name,e.target.checked)
-                else localStorage.removeItem(confirmationState.name);
-            }} style={{cursor:"pointer"}} type='checkbox'/>dont show popup Again</span>
+            {
+              confirmationState.isinput &&
+              <div className='any-input-type-filed'>
+              <input style={{width:"100%"}} value={confirmationState.input.value} 
+              onChange={(e) =>
+              setConfirmationState((prev) => ({
+                ...prev,
+                input: { ...prev.input, value: e.target.value }
+              }))
+            }
+               type={confirmationState.input.type} placeholder={confirmationState.input.placeholder || "Enter here.."}/>
+            </div>
+            }
+            {
+              confirmationState.name &&
+              <span style={{color:"var(--accent)"}}><input onClick={(e)=>{
+                console.log(e.target.checked);
+                if(e.target.checked)localStorage.setItem(confirmationState.name,e.target.checked)
+                  else localStorage.removeItem(confirmationState.name);
+              }} style={{cursor:"pointer"}} type='checkbox'/>dont show popup Again</span>
+            }
             <div className="confirmation-buttons">
               <button className="cancel-btn" onClick={handleCancel}>
                 <FaTimes /> Cancel

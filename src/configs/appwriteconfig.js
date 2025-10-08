@@ -1,6 +1,6 @@
 import { Account ,Storage, ID, Databases, Query, Permission, Role } from "appwrite";
 import bcrypt from 'bcryptjs';
-import { client,appwriteAuth } from "../Auth/appwriteauth";
+import { client } from "../Auth/appwriteauth";
 
  const account = new Account(client);
 
@@ -10,6 +10,7 @@ const bucketId = process.env.REACT_APP_APPWRITE_BUCKET_ID;
 const databaseId = process.env.REACT_APP_APPWRITE_DATABASE_ID;
 const collectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID;
 const historyId = process.env.REACT_APP_APPWRITE_HISTORY_COLLECTION_ID;
+const userCollectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID
 let userId = null;
 try {
   
@@ -41,6 +42,27 @@ export const initStorageSystem = async () => {
     return { success: false, error: "Failed to initialize storage system" };
   }
 };
+
+export const findothersdocuments = async(currentuserid,userid)=>{
+   const queries = [
+    Query.equal("userId", userid),
+  Query.or([
+    Query.equal("isPublic", true),
+    Query.search("allowedUsers",currentuserid)
+  ])
+];
+  try {
+
+    const response = await databases.listDocuments(databaseId, collectionId, queries);
+    console.log(response);
+    return {success:true,docs :response,message:"Fetch seccefullly"}
+   
+    
+  } catch (error) {
+    return {success:false,message:error.message}
+    
+  }
+}
 
 export const uploadFileForUser = async (file, permissionSettings = {},setline) => {
   try {
@@ -129,6 +151,8 @@ export const verifyDocumentAccess = async (fileId, password = null) => {
     return { success: false, error: error.message };
   }
 };
+
+
 
 export const getFileDownload = async (fileId, password = null) => {
   try {

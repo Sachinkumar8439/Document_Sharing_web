@@ -146,7 +146,7 @@
   color: var(--text-primary);
 }
 .subtitle{
-  border-bottom: 2px solid var(--accent);
+  /* border-bottom: 2px solid var(--accent); */
 
 }
 .documents-subtitle {

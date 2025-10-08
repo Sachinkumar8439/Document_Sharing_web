@@ -24,6 +24,7 @@ import { initStorageSystem ,listFilesForUser} from "../configs/appwriteconfig";
 import { checkfile } from "../utility/util";
 import { appwriteAuth } from "../Auth/appwriteauth";
 import { useAuthState } from "../Context/Authcontext";
+import Search from "../components/Search";
 await initStorageSystem();
 
 const Dashboard = () => {
@@ -245,6 +246,13 @@ const Dashboard = () => {
           {!isMobile && <span>Docs</span>}
         </button>
         <button
+          onClick={() => setPage("search")}
+          className={page === "search" ? "active" : ""}
+        >
+          <FaSearch/>
+          {!isMobile && <span>Search</span>}
+        </button>
+        <button
           onClick={() => setPage("history")}
           className={page === "history" ? "active" : ""}
         >
@@ -268,7 +276,7 @@ const Dashboard = () => {
             <History />
           ) : page === "documents" ? (
             <Documents />
-          ) : (
+          ) : page==="search"? <Search/> : (
             <Settings />
           )}
         </div>

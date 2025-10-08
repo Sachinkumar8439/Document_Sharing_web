@@ -9,6 +9,7 @@ import {
   FaFileArchive,
   FaFile,
 } from "react-icons/fa";
+import bcrypt from "bcryptjs";
 export const runhtml= async(url,doc)=>{
      if(!url)return {success:false,message:"url missing"}
       try {
@@ -70,3 +71,12 @@ export const setFont = (font) => {
     // document.documentElement.className = theme;
     localStorage.setItem('font', font);
   };
+
+export const hashPassword = async (password) => {
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
+};
+
+export const verifyPassword = async (password, hash) => {
+  return await bcrypt.compare(password, hash);
+};

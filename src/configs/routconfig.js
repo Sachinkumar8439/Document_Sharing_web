@@ -35,6 +35,7 @@ const setRoutes = async (user)=>{
         isvalid: user ? true:false,
         direct:"/" 
     },
+   
     {
         path: "/verify",
         component: Verify,
