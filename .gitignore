@@ -1,8 +1,4 @@
-# Ignore main node_modules
-/node_modules/
-
-# Ignore nested node_modules (for backend functions etc.)
-/backendfunctions/mainfunction/node_modules/
-
-# Ignore all .env files (in root or subfolders)
+node_modules/
 .env
+dist/
+build/

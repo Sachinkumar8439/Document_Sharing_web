@@ -37,8 +37,8 @@ export const finduser = async(data={})=>{
     console.log("✅ Found user:", res.documents[0]);
     return {success:true,users:res.documents,message:"User Found"};
   } else {
-    console.log("⚠️ No user found with this email");
-    return {success:false,message:"No user found with this email"};
+    console.log("⚠️ No user found with this ",field);
+    return {success:false,message:`No user found with this ${field}`,};
   }  
     
   } catch (error) {

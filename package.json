@@ -19,6 +19,8 @@
     "@testing-library/user-event": "^13.5.0",
     "appwrite": "^18.1.1",
     "bcryptjs": "^3.0.2",
+    "crypto-js": "^4.2.0",
+    "fflate": "^0.8.2",
     "firebase": "^11.9.1",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.539.0",
@@ -29,7 +31,8 @@
     "react-scripts": "5.0.1",
     "styled-components": "^6.1.19",
     "web-vitals": "^2.1.4",
-    "webfontloader": "^1.6.28"
+    "webfontloader": "^1.6.28",
+    "zip-encrypted": "^2.1.1"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -80,3 +80,6 @@ export const hashPassword = async (password) => {
 export const verifyPassword = async (password, hash) => {
   return await bcrypt.compare(password, hash);
 };
+
+export const isOnlyPhoneNumbers = (str) => /^[+-]?\d+$/.test(str);
+export const isOnlyNumbers = (str) => /^\d+$/.test(str);

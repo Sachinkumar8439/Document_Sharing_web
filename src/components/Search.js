@@ -22,7 +22,7 @@ import {
   getFilePreview,
 } from "../configs/appwriteconfig";
 import { useAuthState } from "../Context/Authcontext";
-import { runhtml, getFileIcon } from "../utility/util";
+import { runhtml, getFileIcon, isOnlyPhoneNumbers } from "../utility/util";
 import NoticePage from "../pages/noticepage";
 import { Links, redirect } from "react-router-dom";
 import { BASE_URL, finduser } from "../Auth/appwriteauth";
@@ -41,33 +41,12 @@ export const formatDate = (isoDate) => {
 };
 
 export default function Search() {
-  const { files, showToast, setline, setfiles, showConfirmation } =
+  const {showToast, setline } =
     useAppState();
   const { user } = useAuthState();
-  // const [searchQuery, setSearchQuery] = useState("");
   const [searchquery, setsearchquery] = useState("");
   const [users,setusers] = useState([]);
   const [selecteduser,setselecteduser] = useState(null);
-
-
-  const handleDownloadDocument = async (id) => {
-    if (!id) {
-      showToast.error("Invalid Document");
-      return;
-    }
-
-    await setline(80, true);
-    const response = await getFileDownload(id);
-    if (response.success) {
-      const a = document.createElement("a");
-      a.href = response.url;
-      a.click();
-    } else {
-      showToast.error(response.message);
-    }
-
-    await setline(0);
-  };
 
   const handleusersearch = async ()=>{
        if(searchquery.length <5){
@@ -76,6 +55,10 @@ export default function Search() {
        }
         if(searchquery.includes("@")){
             console.log("yes this is a email");
+            if(searchquery.trim()===user.email){
+              showToast.error("Email must not yours")
+              return;
+            }
             await setline(80);
             const res = await finduser({email:searchquery})
             if(res.success){
@@ -86,14 +69,26 @@ export default function Search() {
             showToast.error(res.message);
             await setline(0)
 
+        }else{
+          if(searchquery.length<10|| searchquery.length>13){
+            showToast.error("Chceck Number of Digits")
+            return;
+          }
+          if(isOnlyPhoneNumbers(searchquery)){
+             await setline(80);
+            const res = await finduser({phone:searchquery})
+            if(res.success){
+              setusers(res.users);
+              await setline(0)
+              return
+            }
+            showToast.error(res.message);
+            await setline(0)
+          }
+
+
         }
   }
- const handleopenuser = ()=>{
-
- }
-  // const filteredDocuments = files?.filter((doc) =>
-  //   doc.name.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
 
   return (
     <div className="documents-container dashboardsection-container">
@@ -103,7 +98,7 @@ export default function Search() {
       <div className="search-container" style={{display:'flex',alignItems:"center"}}>
         <input
           type="text"
-          placeholder="Enter Email or Username"
+          placeholder="Enter Email or phone"
           className="search-input"
           value={searchquery}
           onChange={(e) => setsearchquery(e.target.value)}
@@ -124,10 +119,10 @@ export default function Search() {
             loading...
           </div>
         )}
-        {users.length === 0 ? (
+        {users?.length === 0 ? (
           <NoticePage
             heading="NO CACHED USER YET!"
-            description={"Learn about Searching/hwo to download a file"}
+            description={"Learn about Searching/how to download a file"}
             links={[
               {
                 redirecturl: `${BASE_URL}/documentation`,
@@ -164,7 +159,7 @@ export default function Search() {
           ))
         )}
       </div>
-      {selecteduser && <Otherdocuments currentuserid={user.$id} userid={selecteduser.$id}/>}
+      {selecteduser && <Otherdocuments currentuserid={user.$id} userid={selecteduser.$id} hashedpassword={selecteduser.publicpassword}/>}
     </div>
   );
 }

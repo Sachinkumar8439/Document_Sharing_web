@@ -22,11 +22,13 @@ import Settings, { bytesToMB } from "../components/Settings";
 import { useAppState } from "../Context/AppStateContext";
 import { initStorageSystem ,listFilesForUser} from "../configs/appwriteconfig";
 import { checkfile } from "../utility/util";
-import { appwriteAuth } from "../Auth/appwriteauth";
+import { appwriteAuth, finduser } from "../Auth/appwriteauth";
 import { useAuthState } from "../Context/Authcontext";
 import Search from "../components/Search";
+import { encryptFile, encryptFileWithPassword } from "../utility/fileencyption";
 await initStorageSystem();
 
+let debouncetimer = null;
 const Dashboard = () => {
   const { files, showToast,setfiles,setline ,sethistory,storage,setstorage,line,setprofileimageurl,profileimageurl} = useAppState();
   const [page, setPage] = useState(localStorage.getItem("page") || "documents");
@@ -43,11 +45,11 @@ const Dashboard = () => {
     isPublic: false,
   });
   const [userSearch, setUserSearch] = useState("");
-  const [availableUsers] = useState([
-    { id: 1, name: "Alice Johnson", email: "alice@example.com" },
-    { id: 2, name: "Bob Smith", email: "bob@example.com" },
-    { id: 3, name: "Charlie Brown", email: "charlie@example.com" },
-    { id: 4, name: "Diana Prince", email: "diana@example.com" },
+  const [availableUsers,setavailableUsers] = useState([
+    // { id: 1, name: "Alice Johnson", email: "alice@example.com" },
+    // { id: 2, name: "Bob Smith", email: "bob@example.com" },
+    // { id: 3, name: "Charlie Brown", email: "charlie@example.com" },
+    // { id: 4, name: "Diana Prince", email: "diana@example.com" },
   ]);
   const handleFileChange = (e) => {
     setUploadData({
@@ -62,7 +64,7 @@ const Dashboard = () => {
     
      setUploadData((prev) => {
     let updatedFile = prev.file;
-    if (prev.file) {
+    if (prev.file && name ==="fileName") {
       const ext = prev.file.name.split(".").pop(); 
       updatedFile = new File([prev.file], `${value}.${ext}`, { type: prev.file.type });
     }
@@ -75,17 +77,29 @@ const Dashboard = () => {
   });
   };
 
+  const fetchusers = async(query)=>{
+    const fechedusers = await finduser({email:query})
+    console.log("fectched data ",fechedusers)
+    setavailableUsers(fechedusers.users)
+
+  }
   const handleUserSearch = (e) => {
     setUserSearch(e.target.value);
+    clearTimeout(debouncetimer)
+    if(e.target.value.trim()==="")return
+  debouncetimer = setTimeout(() => {
+      fetchusers(e.target.value)
+    }, 1000);
+
   };
 
   const toggleUserSelection = (user) => {
     setUploadData((prev) => {
-      const isSelected = prev.allowedUsers.some((u) => u.id === user.id);
+      const isSelected = prev.allowedUsers.some((u) => u.$id === user.$id);
       return {
         ...prev,
         allowedUsers: isSelected
-          ? prev.allowedUsers.filter((u) => u.id !== user.id)
+          ? prev.allowedUsers.filter((u) => u.$id !== user.$id)
           : [...prev.allowedUsers, user],
       };
     });
@@ -115,8 +129,15 @@ const Dashboard = () => {
     }
     if(uploadData.file.size < 5242880) await setline(70);
     try {
+      let f = uploadData.file;
+      if(uploadData.filePassword.length>3){
+
+         f = await encryptFileWithPassword(uploadData.file,uploadData.filePassword)
+        console.log("actual file",uploadData.file);
+        console.log("after encytpion",f);
+      }
       
-      const response = await uploadFileForUser(uploadData.file,{isPublic:uploadData.isPublic,allowedUsers:uploadData.allowedUsers,password:uploadData.filePassword},setline);
+      const response = await uploadFileForUser(f,{isPublic:uploadData.isPublic,allowedUsers:uploadData.allowedUsers,password:uploadData.filePassword},setline);
       if (!response.success) {
       showToast.error(response.message);
     }
@@ -146,7 +167,7 @@ const Dashboard = () => {
   }
   };
 
-  const filteredUsers = availableUsers.filter(
+  const filteredUsers = availableUsers?.filter(
     (user) =>
       user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
       user.email.toLowerCase().includes(userSearch.toLowerCase())
@@ -322,7 +343,7 @@ const Dashboard = () => {
                   name="filePassword"
                   value={uploadData.filePassword}
                   onChange={handleInputChange}
-                  placeholder="Set a password for this file"
+                  placeholder="Enter password to encrypt"
                 />
               </div>
 
@@ -377,11 +398,11 @@ const Dashboard = () => {
                 </div>
 
                 <div className="user-list">
-                  {filteredUsers.map((user) => (
+                  {filteredUsers?.map((user) => (
                     <div
-                      key={user.id}
+                      key={user.$id}
                       className={`user-item ${
-                        uploadData.allowedUsers?.some((u) => u.id === user.id)
+                        uploadData.allowedUsers?.some((u) => u.id === user.$id)
                           ? "selected"
                           : ""
                       }`}
@@ -395,7 +416,7 @@ const Dashboard = () => {
                         <div className="user-email">{user.email}</div>
                       </div>
                       {uploadData.allowedUsers?.some(
-                        (u) => u.id === user.id
+                        (u) => u.$id === user.$id
                       ) && <FaCheck className="check-icon" />}
                     </div>
                   ))}
@@ -406,7 +427,7 @@ const Dashboard = () => {
                     <h5>Selected Users ({uploadData.allowedUsers.length})</h5>
                     <div className="selected-users-list">
                       {uploadData.allowedUsers.map((user) => (
-                        <div key={user.id} className="selected-user">
+                        <div key={user.$id} className="selected-user">
                           <span>{user.name}</span>
                           <button
                             onClick={() => toggleUserSelection(user)}

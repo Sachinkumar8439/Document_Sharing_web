@@ -48,7 +48,7 @@ export const findothersdocuments = async(currentuserid,userid)=>{
     Query.equal("userId", userid),
   Query.or([
     Query.equal("isPublic", true),
-    Query.search("allowedUsers",currentuserid)
+    Query.contains("allowedUsers",currentuserid)
   ])
 ];
   try {
@@ -68,14 +68,24 @@ export const uploadFileForUser = async (file, permissionSettings = {},setline) =
   try {
     if (!userId) throw new Error("User not authenticated");
 
+
+    
+    const userIds = permissionSettings.allowedUsers.map(user => user.$id);
     const permissions = [
       Permission.read(Role.user(userId)),
       Permission.write(Role.user(userId)),
-      ...(permissionSettings.allowedUsers?.map(u => Permission.read(Role.user(u))) || [])
     ];
+    //  const permissions=[];
     if (permissionSettings.isPublic) {
-  permissions.push(Permission.read(Role.any()));
-     }
+      permissions.push(Permission.read(Role.any()));
+    }
+    else{
+      // userIds.forEach(id=> permissions.push(Permission.read(Role.user(id))))
+      
+    }
+    // ✅ Add allowed user read permissions (only if valid IDs)
+    console.log("permissions",permissions)
+console.log("userIds:", userIds);
 
     const fileResponse = await storage.createFile(
       bucketId,
@@ -104,7 +114,7 @@ export const uploadFileForUser = async (file, permissionSettings = {},setline) =
         fileType: file.type,
         fileSize: file.size,
         isPublic: permissionSettings.isPublic || false,
-        allowedUsers: permissionSettings.allowedUsers || [],
+        allowedUsers:userIds|| [],
         passwordHash,
         shareableLink: `${window.location.origin}/share/${fileResponse.$id}`,
         uploadedAt: new Date().toISOString(),

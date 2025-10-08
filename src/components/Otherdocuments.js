@@ -22,7 +22,7 @@ import {
   getFilePreview,
 } from "../configs/appwriteconfig";
 import { useAuthState } from "../Context/Authcontext";
-import { runhtml, getFileIcon } from "../utility/util";
+import { runhtml, getFileIcon, verifyPassword } from "../utility/util";
 import NoticePage from "../pages/noticepage";
 import { Links, redirect } from "react-router-dom";
 import { BASE_URL } from "../Auth/appwriteauth";
@@ -39,7 +39,7 @@ export const formatDate = (isoDate) => {
   });
 };
 
-export default function Otherdocuments({ userid, currentuserid }) {
+export default function Otherdocuments({ userid, currentuserid ,hashedpassword}) {
   const { showToast, setline, showConfirmation } = useAppState();
   const { user } = useAuthState();
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,7 +48,15 @@ export default function Otherdocuments({ userid, currentuserid }) {
   const fetchdocuemnts = async () => {
     const res = await findothersdocuments(currentuserid, userid);
     console.log(res);
-    await handleDownloadDocument();
+    if(res.success){
+      if(res.docs.documents.length <=0){
+        showToast.success("No Public Documentsof the User")
+        return;
+      }
+      setfiles(res.docs.documents);
+      return;
+    }
+    showToast.error(res.message)
   };
 
   useEffect(() => {
@@ -58,21 +66,25 @@ export default function Otherdocuments({ userid, currentuserid }) {
   }, [userid]);
 
   const handleDownloadDocument = async (id) => {
-    // if (!id) {
-    //   showToast.error("Invalid Document");
-    //   return;
-    // }
+    if (!id) {
+      showToast.error("Invalid Document");
+      return;
+    }
     const password = await showConfirmation(
-      "Confirm Action", // heading
+      "Confirm Action", 
       "Please enter your password to continue.", // message
       null,
-      true, // show input field
-      "password", // input type
-      "Enter password here..." // placeholder
+      true, 
+      "password", 
+      "Enter password here..." 
     );
-
+    if(!password) return;
+    const isauthorize = await verifyPassword(password,hashedpassword)
     console.log("Entered password:", password);
-    await setline(80, true);
+    if(!isauthorize){
+      showToast.error("Wrong Password")
+      return;
+    }
     const response = await getFileDownload(id);
     if (response.success) {
       const a = document.createElement("a");
@@ -81,12 +93,10 @@ export default function Otherdocuments({ userid, currentuserid }) {
     } else {
       showToast.error(response.message);
     }
-
-    await setline(0);
   };
 
   const filteredDocuments = files?.filter((doc) =>
-    doc.name.toLowerCase().includes(searchQuery.toLowerCase())
+    doc.fileName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -136,11 +146,11 @@ export default function Otherdocuments({ userid, currentuserid }) {
           />
         ) : (
           filteredDocuments?.map((doc) => (
-            <div key={doc.id} className="document-item">
+            <div key={doc.$id} className="document-item">
               <div className="document-info">
-                {getFileIcon(doc.name, doc.fileType)}
+                {getFileIcon(doc.fileName, doc.fileType)}
                 <div className="document-details">
-                  <div className="document-name">{doc.name}</div>
+                  <div className="document-name">{doc.fileName}</div>
                   <div className="document-meta">
                     <span className="document-size">
                       <FaDatabase className="meta-icon" />
@@ -154,7 +164,7 @@ export default function Otherdocuments({ userid, currentuserid }) {
                 <div className="action-div">
                   <button
                     className="action-btn download-btn"
-                    onClick={() => handleDownloadDocument(doc.id)}
+                    onClick={() => handleDownloadDocument(doc.fileId)}
                     title="Download"
                   >
                     <FaDownload />
