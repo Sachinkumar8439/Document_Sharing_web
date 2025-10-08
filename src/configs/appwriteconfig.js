@@ -8,7 +8,7 @@ const storage = new Storage(client);
 const databases = new Databases(client);
 const bucketId = process.env.REACT_APP_APPWRITE_BUCKET_ID;
 const databaseId = process.env.REACT_APP_APPWRITE_DATABASE_ID;
-const collectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID;
+const filecollectionId = process.env.REACT_APP_APPWRITE_USERFILE_COLLECTION_ID;
 const historyId = process.env.REACT_APP_APPWRITE_HISTORY_COLLECTION_ID;
 const userCollectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID
 let userId = null;
@@ -53,7 +53,7 @@ export const findothersdocuments = async(currentuserid,userid)=>{
 ];
   try {
 
-    const response = await databases.listDocuments(databaseId, collectionId, queries);
+    const response = await databases.listDocuments(databaseId, filecollectionId, queries);
     console.log(response);
     return {success:true,docs :response,message:"Fetch seccefullly"}
    
@@ -95,7 +95,7 @@ export const uploadFileForUser = async (file, permissionSettings = {},setline) =
 
     const newDoc = await databases.createDocument(
       databaseId,
-      collectionId,
+      filecollectionId,
       ID.unique(),
       {
         userId,
@@ -127,7 +127,7 @@ export const verifyDocumentAccess = async (fileId, password = null) => {
   try {
     const docs = await databases.listDocuments(
       databaseId,
-      collectionId,
+      filecollectionId,
       [Query.equal("fileId", fileId)]
     );
     const doc = docs.documents[0];
@@ -187,7 +187,7 @@ export const updateDocumentPermissions = async (fileId, updates) => {
 
     const updatedDoc = await databases.updateDocument(
       databaseId,
-      collectionId,
+      filecollectionId,
       doc.$id,
       {
         isPublic: updates.isPublic ?? doc.isPublic,
@@ -207,7 +207,7 @@ export const listFilesForUser = async () => {
     if (!userId) throw new Error("User not authenticated");
     const metadataResponse = await databases.listDocuments(
       databaseId,
-      collectionId,
+      filecollectionId,
       [ Query.equal("userId", userId),
         Query.orderDesc('$createdAt')
       ],
@@ -239,7 +239,7 @@ export const deleteDocuments = async(docs,what='h',setline,userid)=> {
   if(docs.length===0)return {success:false,message:"not document selected"}
    let num = 1;
    let did = historyId;
-   if(what === 'd') did = collectionId
+   if(what === 'd') did = filecollectionId
   await Promise.all(
     docs.map(async (doc) => {
       try {
@@ -261,7 +261,7 @@ export const deleteFileForUser = async (fileId) => {
   try {
     const docs = await databases.listDocuments(
       databaseId,
-      collectionId,
+      filecollectionId,
       [Query.equal("fileId", fileId), Query.equal("userId", userId)]
     );
     const doc = docs.documents[0];
@@ -269,7 +269,7 @@ export const deleteFileForUser = async (fileId) => {
     if (!doc) throw new Error("File not found or access denied");
 
     await storage.deleteFile(bucketId, fileId);
-    await databases.deleteDocument(databaseId, collectionId, doc.$id);
+    await databases.deleteDocument(databaseId, filecollectionId, doc.$id);
     return { success: true, message:"Docuement deleted Successfully!",doc };
   } catch (error) {
     return { success: false, message: error.message };
@@ -280,7 +280,7 @@ export const getDocumentDetails = async (fileId) => {
   try {
     const docs = await databases.listDocuments(
       databaseId,
-      collectionId,
+      filecollectionId,
       [Query.equal("fileId", fileId)]
     );
     const doc = docs.documents[0];
