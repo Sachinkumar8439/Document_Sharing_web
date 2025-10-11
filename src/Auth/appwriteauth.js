@@ -19,10 +19,8 @@ const historyId = process.env.REACT_APP_APPWRITE_HISTORY_COLLECTION_ID;
 const userCollectionId = process.env.REACT_APP_APPWRITE_USER_COLLECTION_ID
 const domain = process.env.REACT_APP_VERCEL_PROJECT_PRODUCTION_URL || "localhost:3000"
 export const BASE_URL = `https://${domain}`;
-console.log("this is base url",BASE_URL);
 
 export const finduser = async(data={})=>{
-  console.log("data in finduser", data);
 
   try {
     const field = data.email ? "email" : "phone";
@@ -32,12 +30,9 @@ export const finduser = async(data={})=>{
     userCollectionId,
     [Query.equal(field,value)]
   );
-  console.log("response of geting user")
   if (res.documents.length > 0) {
-    console.log("✅ Found user:", res.documents[0]);
     return {success:true,users:res.documents,message:"User Found"};
   } else {
-    console.log("⚠️ No user found with this ",field);
     return {success:false,message:`No user found with this ${field}`,};
   }  
     

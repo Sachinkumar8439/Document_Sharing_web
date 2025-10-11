@@ -2,29 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useAppState } from "../Context/AppStateContext";
 import { formatBytes } from "./Profile";
 import {
-  //  FaFileAlt,
   FaDownload,
-  FaEdit,
-  FaTrash,
   FaSearch,
-  FaCalendarAlt,
   FaDatabase,
-  FaFolderOpen,
-  FaShare,
-  FaGlobe,
-  FaCopy,
 } from "react-icons/fa";
 import {
-  createHistoryEntry,
-  deleteFileForUser,
   findothersdocuments,
   getFileDownload,
-  getFilePreview,
 } from "../configs/appwriteconfig";
 import { useAuthState } from "../Context/Authcontext";
-import { runhtml, getFileIcon, verifyPassword } from "../utility/util";
+import { getFileIcon, verifyPassword } from "../utility/util";
 import NoticePage from "../pages/noticepage";
-import { Links, redirect } from "react-router-dom";
 import { BASE_URL } from "../Auth/appwriteauth";
 
 export const formatDate = (isoDate) => {
@@ -40,20 +28,21 @@ export const formatDate = (isoDate) => {
 };
 
 export default function Otherdocuments({ userid, currentuserid ,hashedpassword}) {
-  const { showToast, setline, showConfirmation } = useAppState();
+  const { showToast, showConfirmation } = useAppState();
   const { user } = useAuthState();
   const [searchQuery, setSearchQuery] = useState("");
   const [files, setfiles] = useState([]);
+  const [loading,setloading] = useState(true);
 
   const fetchdocuemnts = async () => {
     const res = await findothersdocuments(currentuserid, userid);
-    console.log(res);
     if(res.success){
       if(res.docs.documents.length <=0){
-        showToast.success("No Public Documentsof the User")
+        setloading(false)
         return;
       }
       setfiles(res.docs.documents);
+      setloading(false);
       return;
     }
     showToast.error(res.message)
@@ -72,7 +61,7 @@ export default function Otherdocuments({ userid, currentuserid ,hashedpassword})
     }
     const password = await showConfirmation(
       "Confirm Action", 
-      "Please enter your password to continue.", // message
+      "Please enter password to Download.", // message
       null,
       true, 
       "password", 
@@ -80,7 +69,6 @@ export default function Otherdocuments({ userid, currentuserid ,hashedpassword})
     );
     if(!password) return;
     const isauthorize = await verifyPassword(password,hashedpassword)
-    console.log("Entered password:", password);
     if(!isauthorize){
       showToast.error("Wrong Password")
       return;
@@ -96,12 +84,11 @@ export default function Otherdocuments({ userid, currentuserid ,hashedpassword})
   };
 
   const filteredDocuments = files?.filter((doc) =>
-    doc.fileName.toLowerCase().includes(searchQuery.toLowerCase())
+    doc.fileName.toLowerCase().includes(searchQuery.toLowerCase()) && doc.fileName.split(".")[0]!==`profile_${userid}`
   );
 
   return (
     <div className="documents-container dashboardsection-container">
-      {/* <h2>Your Documents</h2> */}
       <p className="documents-subtitle subtitle">
         The avaialable docuements for you
       </p>
@@ -131,7 +118,7 @@ export default function Otherdocuments({ userid, currentuserid ,hashedpassword})
           </div>
         )}
 
-        {filteredDocuments.length === 0 ? (
+        {loading ? <div className="verify-loading"></div>: filteredDocuments.length === 0 ? (
           <NoticePage
             heading="NO DOCUMENT FOUND!"
             description={

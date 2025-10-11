@@ -8,6 +8,50 @@
   flex-direction: column-reverse;
   z-index: 1;
 }
+.uploadoptions {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* perfectly center */
+  list-style: none;
+  background-color: var(--nav-bg, #ffffff);
+  padding: 5px 5px;
+  color: var(--card-text, #333333);
+  font-size: 15px;
+  z-index: 10000;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  width: 80%; /* responsive width */
+  max-width: 300px;
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid var(--accent);
+  box-sizing: border-box;
+}
+
+.uploadoptions li {
+  padding: 10px 15px;
+  background-color: var(--card-text, #f0f0f0);
+  margin: 3px 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uploadoptions li:hover {
+  transform: scale(1.03);
+  background-color: var(--accent-hover, #e0e0e0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.uploadoptions li:active {
+  transform: scale(0.98);
+  background-color: var(--accent-active, #dcdcdc);
+}
 
 .left-bottom-navbar {
   background-color: var(--nav-bg);

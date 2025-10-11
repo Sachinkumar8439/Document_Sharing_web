@@ -54,7 +54,6 @@ export const findothersdocuments = async(currentuserid,userid)=>{
   try {
 
     const response = await databases.listDocuments(databaseId, filecollectionId, queries);
-    console.log(response);
     return {success:true,docs :response,message:"Fetch seccefullly"}
    
     
@@ -64,29 +63,22 @@ export const findothersdocuments = async(currentuserid,userid)=>{
   }
 }
 
-export const uploadFileForUser = async (file, permissionSettings = {},setline) => {
+
+
+export const uploadFileForUser = async (file, permissionSettings = {},setline,isprofile=false) => {
   try {
     if (!userId) throw new Error("User not authenticated");
 
 
     
-    const userIds = permissionSettings.allowedUsers.map(user => user.$id);
     const permissions = [
       Permission.read(Role.user(userId)),
       Permission.write(Role.user(userId)),
     ];
-    //  const permissions=[];
     if (permissionSettings.isPublic) {
       permissions.push(Permission.read(Role.any()));
     }
-    else{
-      // userIds.forEach(id=> permissions.push(Permission.read(Role.user(id))))
-      
-    }
-    // ✅ Add allowed user read permissions (only if valid IDs)
-    console.log("permissions",permissions)
-console.log("userIds:", userIds);
-
+    
     const fileResponse = await storage.createFile(
       bucketId,
       ID.unique(),
@@ -95,14 +87,19 @@ console.log("userIds:", userIds);
       (uploadProgress) => {
       const percent = parseFloat(uploadProgress.progress.toFixed(2));
       const adjusted = (percent / 100) * 99;
-      setline(adjusted.toFixed(0));
+      if(setline){
+
+        setline(adjusted.toFixed(0));
+      }
       }
     );
-
+    if(isprofile) return {success:true,fileResponse}
+    
     const passwordHash = permissionSettings.password 
-      ? await hashPassword(permissionSettings.password) 
-      : null;
-
+    ? await hashPassword(permissionSettings.password) 
+    : null;
+    
+    const userIds = permissionSettings.allowedUsers.map(user => user.$id);
     const newDoc = await databases.createDocument(
       databaseId,
       filecollectionId,
@@ -256,7 +253,6 @@ export const deleteDocuments = async(docs,what='h',setline,userid)=> {
         await databases.deleteDocument(databaseId,did, doc.id);
         await setline((num/docs.length)*100,true)
         num++;
-        console.log("Deleted document:", doc.id);
       } catch (error) {
         console.error("Error deleting document:", doc, error);
       }
@@ -267,18 +263,23 @@ export const deleteDocuments = async(docs,what='h',setline,userid)=> {
 
 }
 
-export const deleteFileForUser = async (fileId) => {
+export const deleteFileForUser = async (fileId,isprofile) => {
   try {
-    const docs = await databases.listDocuments(
-      databaseId,
-      filecollectionId,
-      [Query.equal("fileId", fileId), Query.equal("userId", userId)]
-    );
-    const doc = docs.documents[0];
+    let doc;
+    if(!isprofile){
 
-    if (!doc) throw new Error("File not found or access denied");
+      const docs = await databases.listDocuments(
+        databaseId,
+        filecollectionId,
+        [Query.equal("fileId", fileId), Query.equal("userId", userId)]
+      );
+       doc = docs.documents[0];
+      
+      if (!doc) throw new Error("File not found or access denied");
+    }
 
     await storage.deleteFile(bucketId, fileId);
+    if(isprofile)return {success:true,message:"profile deleted"}
     await databases.deleteDocument(databaseId, filecollectionId, doc.$id);
     return { success: true, message:"Docuement deleted Successfully!",doc };
   } catch (error) {
@@ -411,4 +412,22 @@ export const updatePassword = async (password, oldPassword) => {
     }
   }
 };
+
+export const updateuser = async(userid,newdata)=>{
+  if(!newdata) return {success:false, message:"some data will be required"}
+  try{
+   const result = await databases.updateDocument(
+      databaseId,
+      userCollectionId,
+      userid,
+      newdata
+    );
+    console.log("Updated Document:", result);
+    return {success:true,message:"User updated successfully",newuser:result};
+  } catch (error) {
+    console.error("Error updating field:", error);
+    return {success:false,message:error.message}
+  }
+
+}
 

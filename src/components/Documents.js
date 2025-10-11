@@ -23,7 +23,6 @@ import {
 import { useAuthState } from "../Context/Authcontext";
 import { runhtml, getFileIcon } from "../utility/util";
 import NoticePage from "../pages/noticepage";
-import { Links, redirect } from "react-router-dom";
 import { BASE_URL } from "../Auth/appwriteauth";
 
 export const formatDate = (isoDate) => {
@@ -150,8 +149,8 @@ export default function Documents() {
     }
     await setline(0);
   };
-  const filteredDocuments = files?.filter((doc) =>
-    doc.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredDocuments = files?.filter((doc) => 
+    doc.name.toLowerCase().includes(searchQuery.toLowerCase()) && doc.name.split(".")[0]!==`profile_${user.$id}`
   );
   const handlecopy = async (id) => {
     const response = await getFilePreview(id);
@@ -220,10 +219,11 @@ export default function Documents() {
                 text: "Documentation",
               },
             ]}
-          />
-        ) : (
-          filteredDocuments?.map((doc) => (
-            <div key={doc.id} className="document-item">
+            />
+          ) : (
+            filteredDocuments?.map((doc) => (
+                
+                <div key={doc.id} className="document-item">
               <div className="document-info">
                 {getFileIcon(doc.name, doc.fileType)}
                 <div className="document-details">
@@ -235,65 +235,67 @@ export default function Documents() {
                       <span style={{ paddingLeft: "5px" }}>
                         {doc.isPublic ? <FaGlobe /> : ""}
                       </span>
-                    </span>
+                      </span>
                     <span className="document-size">
                       <FaDatabase className="meta-icon" />
                       {formatBytes(doc.fileSize)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="document-actions">
-                <div className="action-div">
-                  <button
-                    className="action-btn copylink-btn"
-                    onClick={() => handlecopy(doc.id)}
-                    title="copy link to share docuement"
-                  >
-                    <FaCopy />
-                  </button>
+                      </span>
+                      </div>
+                      </div>
+                      </div>
+                      
+                      <div className="document-actions">
+                      <div className="action-div">
+                      <button
+                      className="action-btn copylink-btn"
+                      onClick={() => handlecopy(doc.id)}
+                      title="copy link to share docuement"
+                      >
+                      <FaCopy />
+                      </button>
                   <button
                     className="action-btn share-btn"
                     onClick={() => handleShareDocument(doc)}
                     title="share document"
-                  >
+                    >
                     <FaShare />
-                  </button>
+                    </button>
                   <button
                     className="action-btn open-btn"
                     onClick={() => handleOpenDocument(doc)}
                     title="Open"
-                  >
+                    >
                     <FaFolderOpen />
-                  </button>
-                  <button
+                    </button>
+                    <button
                     className="action-btn download-btn"
                     onClick={() => handleDownloadDocument(doc.id)}
                     title="Download"
                   >
                     <FaDownload />
-                  </button>
-                  <button
+                    </button>
+                    <button
                     className="action-btn"
                     onClick={() => handleEditDocument(doc.id)}
                     title="Edit"
-                  >
+                    >
                     <FaEdit />
-                  </button>
-                  <button
+                    </button>
+                    <button
                     className="action-btn"
                     onClick={() => handleDeleteDocument(doc)}
                     title="Delete"
-                  >
+                    >
                     <FaTrash />
-                  </button>
-                </div>
-              </div>
+                    </button>
+                    </div>
+                    </div>
+                    </div>
+                  )
+                )
+              )
+            }
             </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
+            </div>
+          );
 }

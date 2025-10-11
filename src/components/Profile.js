@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import {
   FaFileAlt,
   FaEdit,
@@ -13,7 +13,15 @@ import {
 } from "react-icons/fa";
 import { useAppState } from "../Context/AppStateContext";
 import { useAuthState } from "../Context/Authcontext";
-import { updateName } from "../configs/appwriteconfig";
+import {
+  deleteFileForUser,
+  getFilePreview,
+  updateName,
+  updateuser,
+  uploadFileForUser,
+} from "../configs/appwriteconfig";
+import { openFilePicker } from "../utility/util";
+import { finduser } from "../Auth/appwriteauth";
 
 export const formatBytes = (bytes, decimals = 2) => {
   if (bytes === 0) return "0 Bytes";
@@ -24,45 +32,50 @@ export const formatBytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 const Profile = () => {
-  const { showToast, documents, files, setline,storage,setstorage,profileimageurl } = useAppState();
+  const {
+    showToast,
+    documents,
+    files,
+    setline,
+    storage,
+  } = useAppState();
   const { user, setuser } = useAuthState();
-
- 
-
-  // const [user, setUser] = useState({
-  //   name: "John Doe",
-  //   email: "john.doe@example.com",
-  //   avatar: null,
-  //   isVip: true,
-  //   joinDate: new Date('2023-01-15'),
-  //   totalDocuments: 42,
-  //   totalStorageUsed: 256000000,
-  //   documentTypes: {
-  //     pdf: 12,
-  //     doc: 15,
-  //     ppt: 5,
-  //     xls: 7,
-  //     other: 3
-  //   }
-  // });
+  const [image, setimage] = useState(
+    localStorage.getItem("profile") ||null
+  );
 
   const [isEditing, setIsEditing] = useState(false);
   const [name, setname] = useState(user?.name || "UnNamedUser");
-  const [file,setfile] = useState(null);
-  const formatDate = (date) => {
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
 
-  // const formatTime = (date) => {
-  //     return date.toLocaleTimeString('en-US', {
-  //         hour: '2-digit',
-  //         minute: '2-digit'
-  //     });
-  // };
+  const handleprofile = async () => {
+    try {
+      const file = await openFilePicker(user.$id,image);
+      await setline(50);
+      const res = await uploadFileForUser(file, {
+        isPublic: true,
+        allowedUsers: [],
+      },null,true);
+      if (res.success) {
+        await setline(75);
+        if(image?.split("FILEID")[1].length!==0){
+          const da = await deleteFileForUser(image.split("FILEID")[1],true)
+
+        }
+        const urldata = await getFilePreview(res.fileResponse.$id);
+        await setline(98);
+        const r = await updateuser(user.$id, { image: `${urldata.url}FILEID${res.fileResponse.$id}` });
+        setimage(r.newuser.image)
+        localStorage.setItem("profile",r.newuser.image)
+        showToast.success("Profile Updated !");
+      } else {
+        showToast.error(res.error);
+      }
+    } catch (error) {
+      showToast.error(error.message);
+    } finally {
+      await setline(0);
+    }
+  };
   const handleSaveProfile = async (e) => {
     e.preventDefault();
 
@@ -72,7 +85,6 @@ const Profile = () => {
     }
     await setline(80, true);
     const response = await updateName(name);
-    console.log(response);
     if (response.success) {
       setuser(response.data);
       showToast.success(response.message);
@@ -84,6 +96,26 @@ const Profile = () => {
     await setline(0);
     setIsEditing(false);
   };
+  const fetchdocuser = async () => {
+    const res = await finduser({ email: user.email });
+    if (res.success) {
+      if(res.users[0].image && res.users[0].image.trim()==="") {
+        localStorage.removeItem("profile")
+        setimage(null);
+      }
+        else{
+      setimage(res.users[0].image);
+      localStorage.setItem("profile", res.users[0].image);
+    }
+    }else{
+      localStorage.removeItem("profile");
+    }
+  };
+  useEffect(() => {
+    if (user) {
+        fetchdocuser(); 
+    }
+  }, [user]);
 
   return (
     <div className="documents-container dashboardsection-container">
@@ -93,15 +125,23 @@ const Profile = () => {
       <div className="profile-card">
         <div className="profile-header">
           <div className="avatar-container">
-            {profileimageurl ? (
-              <img src={profileimageurl} alt="User Avatar" className="avatar" />
+            {image ? (
+              <img
+                src={image?.split("FILEID")[0]}
+                alt="User Avatar"
+                className="avatar"
+              />
             ) : (
               <FaUserCircle className="avatar-default" />
             )}
-            <div onClick={(e)=>{
-              e.preventDefault()
-              showToast.success("Just Upload __profile.jpg file by + button in right bottom corner",10000)
-            }} title="want to add new profile image just upload __profile.jpg file or image by + button" className="edit-avatar-btn">
+            <div
+              onClick={(e) => {
+                e.preventDefault();
+                handleprofile();
+              }}
+              title="edit profile"
+              className="edit-avatar-btn"
+            >
               <FaCamera className="profile-image-camera" />
             </div>
           </div>
@@ -134,7 +174,7 @@ const Profile = () => {
             <div className="form-group">
               <label>Full Name</label>
               <input
-                onFocus={(e)=>e.target.select()}
+                onFocus={(e) => e.target.select()}
                 autoFocus={true}
                 type="text"
                 value={name}
@@ -167,7 +207,7 @@ const Profile = () => {
               <h4>Document Statistics</h4>
               <div className="stats-grid">
                 <div className="stat-card">
-                  <div className="stat-value">{files.length}</div>
+                  <div className="stat-value">{files.length - image ?1:0}</div>
                   <div className="stat-label">Total Documents</div>
                 </div>
                 <div className="stat-card">

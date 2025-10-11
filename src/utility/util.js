@@ -1,5 +1,5 @@
 import {
-   FaFileAlt,
+  FaFileAlt,
   FaFilePdf,
   FaFileImage,
   FaFileWord,
@@ -10,6 +10,7 @@ import {
   FaFile,
 } from "react-icons/fa";
 import bcrypt from "bcryptjs";
+import JSZip from "jszip";
 export const runhtml= async(url,doc)=>{
      if(!url)return {success:false,message:"url missing"}
       try {
@@ -60,7 +61,7 @@ export const checkfile = async(files ,data)=>{
      if(files.length <=0){
       return true;
      }
-     return !files.some((f) => f.name === data.file.name);
+     return !files.some((f) => f.name === data.files[0].name);
 }
 
 export const setTheme = (theme) => {
@@ -83,3 +84,84 @@ export const verifyPassword = async (password, hash) => {
 
 export const isOnlyPhoneNumbers = (str) => /^[+-]?\d+$/.test(str);
 export const isOnlyNumbers = (str) => /^\d+$/.test(str);
+
+
+export async function createSmartZip(files, fileName = "archive.zip") {
+  if (!files || files.length === 0) {
+    throw new Error("No files selected!");
+  }
+
+  const fileArray = Array.from(files);
+
+  if (fileArray.length === 1 && !fileArray[0].webkitRelativePath) {
+    return fileArray[0];
+  }
+
+  const zip = new JSZip();
+
+  for (const file of fileArray) {
+    const data = await file.arrayBuffer();
+    const path = file.webkitRelativePath || file.name; 
+    zip.file(path, data, {
+      date: file.lastModified ? new Date(file.lastModified) : new Date(),
+      comment: `Original Type: ${file.type}`,
+    });
+  }
+
+  const zipBlob = await zip.generateAsync({
+    type: "blob",
+    mimeType: "application/zip",
+    compression: "DEFLATE",
+    compressionOptions: { level: 6 },
+  });
+
+  let finalName = fileName.endsWith(".zip") ? fileName : `${fileName}.zip`;
+  if (!fileName || fileName === "archive.zip") {
+    finalName = fileArray[0].webkitRelativePath
+      ? `${fileArray[0].webkitRelativePath.split("/")[0] || "folder"}.zip`
+      : "files.zip";
+  }
+
+  return new File([zipBlob], finalName, {
+    type: "application/zip",
+    lastModified: Date.now(),
+  });
+}
+
+
+export function openFilePicker(userId,image) {
+  return new Promise((resolve, reject) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".jpg,.jpeg,.png"; 
+    input.style.display = "none";
+
+    input.onchange = (event) => {
+      const file = event.target.files?.[0];
+
+      if (file) {
+        const extension = file.name.split(".").pop();
+        const newFileName = `profile_${userId}.${extension}`;
+
+        const renamedFile = new File([file], newFileName, {
+          type: file.type,
+          lastModified: file.lastModified,
+        });
+
+        resolve(renamedFile);
+      } else {
+        reject(new Error("No file selected"));
+      }
+      document.body.removeChild(input);
+    };
+
+    input.oncancel = () => {
+      reject(new Error("File selection cancelled"));
+      document.body.removeChild(input);
+    };
+
+    document.body.appendChild(input);
+
+    input.click();
+  });
+}

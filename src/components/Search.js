@@ -1,30 +1,14 @@
 import React, { useState } from "react";
 import { useAppState } from "../Context/AppStateContext";
 import { formatBytes } from "./Profile";
+import "../pages/verify.css"
 import {
-  //  FaFileAlt,
-  FaDownload,
-  FaEdit,
-  FaTrash,
   FaSearch,
-  FaCalendarAlt,
-  FaDatabase,
-  FaFolderOpen,
-  FaShare,
-  FaGlobe,
-  FaCopy,
-  FaWpexplorer,
+  FaUserCircle,
 } from "react-icons/fa";
-import {
-  createHistoryEntry,
-  deleteFileForUser,
-  getFileDownload,
-  getFilePreview,
-} from "../configs/appwriteconfig";
 import { useAuthState } from "../Context/Authcontext";
-import { runhtml, getFileIcon, isOnlyPhoneNumbers } from "../utility/util";
+import { isOnlyPhoneNumbers } from "../utility/util";
 import NoticePage from "../pages/noticepage";
-import { Links, redirect } from "react-router-dom";
 import { BASE_URL, finduser } from "../Auth/appwriteauth";
 import Otherdocuments from "./Otherdocuments";
 
@@ -54,7 +38,6 @@ export default function Search() {
         return
        }
         if(searchquery.includes("@")){
-            console.log("yes this is a email");
             if(searchquery.trim()===user.email){
               showToast.error("Email must not yours")
               return;
@@ -98,9 +81,11 @@ export default function Search() {
       <div className="search-container" style={{display:'flex',alignItems:"center"}}>
         <input
           type="text"
+          name="email"
           placeholder="Enter Email or phone"
           className="search-input"
           value={searchquery}
+          autoComplete="on"
           onChange={(e) => setsearchquery(e.target.value)}
         />
           <FaSearch onClick={handleusersearch} title="search user" className="icon" style={{cursor:"pointer",position:"absolute",right:"20px"}} />
@@ -134,7 +119,18 @@ export default function Search() {
           users?.map((u,index) => (
             <div key={u.$id} className="document-item">
               <div className="document-info">
-                <img width={"40px"} src={u.image} alt={"user"+index}/>
+                 {u.image ? (
+                              <img
+                                src={u.image.split("FILEID")[0]}
+                                alt={"user"+index}
+                                // className="avatar"
+                                width={"50px"}
+                                height={"50px"}
+                                style={{borderRadius:"100%"}}
+                              />
+                            ) : (
+                              <FaUserCircle className="avatar-default" />
+                            )}
                 <div className="document-details">
                   <div className="document-name">{u.name}</div>
                   <div className="document-meta">

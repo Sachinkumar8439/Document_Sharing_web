@@ -1,5 +1,5 @@
-:root {
-  --dark-bg: #121212;
+/* :root { */
+  /* --dark-bg: #121212;
   --darker-bg: #1e1e1e;
   --nav-bg: #252525;
   --accent: #bb86fc;
@@ -8,9 +8,9 @@
   --text-secondary: #a0a0a0;
   --content-bg: #2d2d2d;
   --card-bg: #383838;
-  --transition-speed: 0.3s;
+  --transition-speed: 0.3s; */
   /* Add to existing :root */
-  --uploaded: #4caf50;
+  /* --uploaded: #4caf50;
   --downloaded: #2196f3;
   --edited: #ff9800;
   --shared: #9c27b0;
@@ -19,8 +19,10 @@
   --excel: #217346;
   --powerpoint: #d24726;
   --pdf: #f40f02;
-  --archive: #795548;
-}
+  --archive: #795548; */
+/* } */
+
+
 
 .dashboard-container {
   height: 100vh;
@@ -312,6 +314,7 @@
   position: relative;
   margin-bottom: 20px;
 }
+
 
 .search-input {
   width: 100%;

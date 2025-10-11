@@ -1,7 +1,6 @@
 import { faL } from "@fortawesome/free-solid-svg-icons";
 
 const url = process.env.REACT_APP_APPWRITE_MAINFUNCTION_URL;
-console.log("function url" , url);
 export const callAppwriteFunction = async (
   method = 'GET',
   body = null,

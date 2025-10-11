@@ -1,8 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 // import "./dashboard.css";
 import "../components/dashboardsections.css";
-import "./uploadingpage.css"
-import { createHistoryEntry, getFilePreview, gethistory, uploadFileForUser } from "../configs/appwriteconfig";
+import "./uploadingpage.css";
+import {
+  createHistoryEntry,
+  getFilePreview,
+  gethistory,
+  uploadFileForUser,
+} from "../configs/appwriteconfig";
 import {
   FaUser,
   FaFileAlt,
@@ -20,77 +25,117 @@ import History from "../components/History";
 import Documents from "../components/Documents";
 import Settings, { bytesToMB } from "../components/Settings";
 import { useAppState } from "../Context/AppStateContext";
-import { initStorageSystem ,listFilesForUser} from "../configs/appwriteconfig";
+import { initStorageSystem, listFilesForUser } from "../configs/appwriteconfig";
 import { checkfile } from "../utility/util";
 import { appwriteAuth, finduser } from "../Auth/appwriteauth";
 import { useAuthState } from "../Context/Authcontext";
 import Search from "../components/Search";
 import { encryptFile, encryptFileWithPassword } from "../utility/fileencyption";
+import { createSmartZip } from "../utility/util";
 await initStorageSystem();
 
 let debouncetimer = null;
 const Dashboard = () => {
-  const { files, showToast,setfiles,setline ,sethistory,storage,setstorage,line,setprofileimageurl,profileimageurl} = useAppState();
+  const {
+    files,
+    showToast,
+    setfiles,
+    setline,
+    sethistory,
+    storage,
+    setstorage,
+    line,
+  } = useAppState();
   const [page, setPage] = useState(localStorage.getItem("page") || "documents");
   const [isMobile, setIsMobile] = useState(false);
   const [isuploading, setisuploading] = useState(false);
   const [showUploadPopup, setShowUploadPopup] = useState(false);
-  const {setsessions} = useAuthState();
-
+  const { setsessions, user } = useAuthState();
+  const [fileoption, setfileoption] = useState({
+    isvisible: false,
+    state: 0,
+  });
+  const popufforuploadingfiletype = useRef(null);
   const [uploadData, setUploadData] = useState({
     fileName: "",
     filePassword: "",
-    file: null,
+    files: [],
     allowedUsers: [],
     isPublic: false,
   });
   const [userSearch, setUserSearch] = useState("");
-  const [availableUsers,setavailableUsers] = useState([
-    // { id: 1, name: "Alice Johnson", email: "alice@example.com" },
-    // { id: 2, name: "Bob Smith", email: "bob@example.com" },
-    // { id: 3, name: "Charlie Brown", email: "charlie@example.com" },
-    // { id: 4, name: "Diana Prince", email: "diana@example.com" },
-  ]);
+  const [availableUsers, setavailableUsers] = useState([]);
+
+
   const handleFileChange = (e) => {
-    setUploadData({
-      ...uploadData,
-      file: e.target.files[0],
-      fileName: e.target.files[0]?.name || "",
-    });
+   const selectedFiles = Array.from(e.target.files);
+  if (!selectedFiles.length) return;
+
+  const firstFile = selectedFiles[0];
+  let newFileName = "untitled.zip";
+
+  if (fileoption.state === 0) {
+    newFileName = firstFile.name;
+  }
+
+  else if (fileoption.state === 1) {
+    newFileName = "files.zip";
+  }
+
+  else if (fileoption.state === 2) {
+    const relativePath = firstFile.webkitRelativePath || "";
+    const folderName = relativePath.split("/")[0] || "folder";
+    newFileName = `${folderName}.zip`;
+  }
+
+  setUploadData((prev) => ({
+    ...prev,
+    files: selectedFiles,
+    fileName: newFileName,
+  }));
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-     setUploadData((prev) => {
-    let updatedFile = prev.file;
-    if (prev.file && name ==="fileName") {
-      const ext = prev.file.name.split(".").pop(); 
-      updatedFile = new File([prev.file], `${value}.${ext}`, { type: prev.file.type });
-    }
 
-    return {
+  if (name !== "fileName") {
+    setUploadData((prev) => ({ ...prev, [name]: value }));
+    return;
+  }
+
+  if (fileoption.state === 0 && uploadData.files.length === 1) {
+    const oldFile = uploadData.files[0];
+    const newFile = new File([oldFile], `${value.split(".")[0]}.${oldFile.name.split(".")[1]}`, {
+      type: oldFile.type,
+    });
+
+    setUploadData((prev) => ({
       ...prev,
-      [name]: value,
-      file: updatedFile,
-    };
-  });
+      fileName: `${value.split(".")[0]}.${oldFile.name.split(".")[1]}`,
+      files: [newFile],
+    }));
+  }
+
+  else {
+    const finalName = value.split(".")[0]+'.zip';
+    setUploadData((prev) => ({
+      ...prev,
+      fileName: finalName,
+    }));
+  }
   };
 
-  const fetchusers = async(query)=>{
-    const fechedusers = await finduser({email:query})
-    console.log("fectched data ",fechedusers)
-    setavailableUsers(fechedusers.users)
-
-  }
+  const fetchusers = async (query) => {
+    const fechedusers = await finduser({ email: query });
+    setavailableUsers(fechedusers.users);
+  };
   const handleUserSearch = (e) => {
     setUserSearch(e.target.value);
-    clearTimeout(debouncetimer)
-    if(e.target.value.trim()==="")return
-  debouncetimer = setTimeout(() => {
-      fetchusers(e.target.value)
+    clearTimeout(debouncetimer);
+    if (e.target.value.trim() === "") return;
+    debouncetimer = setTimeout(() => {
+      fetchusers(e.target.value);
     }, 1000);
-
   };
 
   const toggleUserSelection = (user) => {
@@ -106,65 +151,88 @@ const Dashboard = () => {
   };
 
   const handleUpload = async () => {
-    if(isuploading) return;
-    if(bytesToMB(uploadData.file.size + storage) -50>0){
-      showToast.error(`Limit exceed [ ${50 - bytesToMB(storage)}MB Available and your file size is ${bytesToMB(uploadData.file.size)}MB ]`)
-      return
-    }
-    setisuploading(true);
-    if(uploadData.fileName.trim(" ") ===""){
-      showToast.error("File name should not be empty");
-      setisuploading(false)
-      return;
-    }
-    const isuniquefile = await checkfile(files,uploadData);
-    if(!isuniquefile){
-       showToast.error("file name allready exists");
-       setisuploading(false)
-       return
-    }
-    if (!uploadData.file) {
-      showToast.error("file not selected");
-      return;
-    }
-    if(uploadData.file.size < 5242880) await setline(70);
-    try {
-      let f = uploadData.file;
-      if(uploadData.filePassword.length>3){
+    if (isuploading) return;
 
-         f = await encryptFileWithPassword(uploadData.file,uploadData.filePassword)
-        console.log("actual file",uploadData.file);
-        console.log("after encytpion",f);
-      }
-      
-      const response = await uploadFileForUser(f,{isPublic:uploadData.isPublic,allowedUsers:uploadData.allowedUsers,password:uploadData.filePassword},setline);
+  if (!uploadData.files?.length) {
+    showToast.error("No file selected");
+    return;
+  }
+
+  if (uploadData.fileName.trim() === "") {
+    showToast.error("File name should not be empty");
+    return;
+  }
+
+  setisuploading(true);
+
+  try {
+    const finalFile = await createSmartZip(uploadData.files, uploadData.fileName);
+
+    const totalSizeMB = bytesToMB(finalFile.size + storage);
+    if (totalSizeMB - 50 > 0) {
+      showToast.error(
+        `Limit exceed [ ${50 - bytesToMB(storage)}MB Available and your file size is ${bytesToMB(finalFile.size)}MB ]`
+      );
+      setisuploading(false);
+      return;
+    }
+
+    const isuniquefile = await checkfile(files, { ...uploadData, fileName: finalFile.name });
+    if (!isuniquefile) {
+      showToast.error("File name already exists");
+      setisuploading(false);
+      return;
+    }
+
+    let fileToUpload = finalFile;
+    if (uploadData.filePassword.length > 3) {
+      fileToUpload = await encryptFileWithPassword(finalFile, uploadData.filePassword);
+    }
+
+    if (fileToUpload.size < 5242880) await setline(70);
+      const response = await uploadFileForUser(
+        fileToUpload,
+        {
+          isPublic: uploadData.isPublic,
+          allowedUsers: uploadData.allowedUsers,
+          password: uploadData.filePassword,
+          fileName: finalFile.name,
+        },
+        setline
+      );
+
       if (!response.success) {
-      showToast.error(response.message);
+        showToast.error(response.message);
+      } else {
+        const newfile = response.newfile;
+        await setline(99, true);
+        await createHistoryEntry({
+          id: newfile.id,
+          name: newfile.name,
+          fileType: newfile.fileType,
+          fileSize: newfile.fileSize,
+          uploadedAt: newfile.uploadedAt,
+          userId: newfile.userId,
+        });
+        showToast.success("Document Uploaded Successfully");
+
+        setfiles((prev) => [newfile, ...prev]);
+        setShowUploadPopup(false);
+        setUploadData({
+          fileName: "",
+          filePassword: "",
+          files: [],
+          allowedUsers: [],
+          isPublic: false,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      showToast.error(error.message);
+    } finally {
+      await setline(0);
+      setisuploading(false);
     }
-    else{
-      const newfile = response.newfile;
-      await setline(99,true)
-      await createHistoryEntry({id:newfile.id,name:newfile.name,fileType:newfile.fileType,fileSize:newfile.fileSize,uploadedAt:newfile.uploadedAt,userId:newfile.userId})
-      showToast.success("Docuemnt Uploaded Successfully");
-      // const formatehistory = await formatHistoryData(newfile);
-      setfiles((prev) => [response.newfile,...prev]);
-      // sethistory((prev) => [formatehistory,...prev]);
-      setShowUploadPopup(false);
-      setUploadData({
-        fileName: "",
-        filePassword: "",
-        file: null,
-        allowedUsers: [],
-        isPublic: false,
-      });
-    }
-  } catch (error) {
-       showToast.error(error.message);
-  }
-  finally{
-   await setline(0)
-   setisuploading(false)
-  }
   };
 
   const filteredUsers = availableUsers?.filter(
@@ -172,61 +240,39 @@ const Dashboard = () => {
       user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
       user.email.toLowerCase().includes(userSearch.toLowerCase())
   );
-  const perfomrminitials = async()=>{
-    await setline(50,true);
-     const response = await listFilesForUser();
-     if(response.success)
-      {
-       setfiles(response.files);
-     }
-     else{
+  const perfomrminitials = async () => {
+    await setline(50, true);
+    const response = await listFilesForUser();
+    if (response.success) {
+      setfiles(response.files);
+    } else {
       showToast.error(response.message);
-     }
-     await setline(90,true)
-    const result = await gethistory();
-     if(result.success)
-     {
-      sethistory(result.history);
-     }
-     else{
-
-       showToast.error(result.message);
-      }
-
-      await setline(0)
-      const res = await appwriteAuth.getUserSessions();
-      if(res.success){
-        setsessions(res.sessions);
-      }
-     
-  }
-  
-  useEffect(()=>{
-    const fetchprofileimage = async(id)=>{
-        const response = await getFilePreview(id)
-        if(response.success){
-          localStorage.setItem("profileimage",response.url)
-          setprofileimageurl(response.url)
-        }
     }
-    let isprofileimage = false;
+    await setline(90, true);
+    const result = await gethistory();
+    if (result.success) {
+      sethistory(result.history);
+    } else {
+      showToast.error(result.message);
+    }
+
+    await setline(0);
+    const res = await appwriteAuth.getUserSessions();
+    if (res.success) {
+      setsessions(res.sessions);
+    }
+  };
+
+  useEffect(() => {
     let storageused = 0;
     files.forEach((element) => {
-      if(element.name === "__profile.jpg"){
-        isprofileimage = true;
-        fetchprofileimage(element.id)
+      if (element.name.split(".")[0] !== `profile_${user.$id}`) {
+        storageused += element.fileSize;
       }
-      
-      storageused += element.fileSize;
     });
-    if(!isprofileimage)
-        {
-          setprofileimageurl(null)
-          localStorage.removeItem("profileimage")
-        }
-    setstorage(storageused);
 
-  },[files,setstorage,setprofileimageurl])
+    setstorage(storageused);
+  }, [files, setstorage, user]);
 
   useEffect(() => {
     perfomrminitials();
@@ -241,13 +287,28 @@ const Dashboard = () => {
       window.removeEventListener("resize", checkIfMobile);
     };
   }, []);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        popufforuploadingfiletype.current &&
+        !popufforuploadingfiletype.current.contains(event.target)
+      ) {
+        setfileoption((prev) => ({ ...prev, isvisible: false }));
+      }
+    };
 
-  useEffect(()=>{
-    if(page!=="setings" || page !=="history")
-    {
-      localStorage.setItem("page",page);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [setfileoption]);
+
+  useEffect(() => {
+    if (page !== "setings" || page !== "history") {
+      localStorage.setItem("page", page);
     }
-  },[page])
+  }, [page]);
 
   return (
     <div className="dashboard-container">
@@ -270,7 +331,7 @@ const Dashboard = () => {
           onClick={() => setPage("search")}
           className={page === "search" ? "active" : ""}
         >
-          <FaSearch/>
+          <FaSearch />
           {!isMobile && <span>Search</span>}
         </button>
         <button
@@ -290,6 +351,27 @@ const Dashboard = () => {
       </div>
 
       <div className="main-content-page">
+        {fileoption.isvisible && (
+          <ul className="uploadoptions" ref={popufforuploadingfiletype}>
+            <li
+              onClick={() => {
+                setfileoption({ isvisible: false,state:0 });
+                setShowUploadPopup(true)
+              }}
+            >
+              Upload single file
+            </li>
+            <li  onClick={() => {
+                setfileoption({ isvisible: false ,state:1});
+                setShowUploadPopup(true)
+              }}
+              >Upload multiple files</li>
+            <li onClick={() => {
+                setfileoption({ isvisible: false ,state:2});
+                setShowUploadPopup(true)
+              }}>upload Folder as ZIP</li>
+          </ul>
+        )}
         <div className="page-content">
           {page === "profile" ? (
             <Profile />
@@ -297,13 +379,20 @@ const Dashboard = () => {
             <History />
           ) : page === "documents" ? (
             <Documents />
-          ) : page==="search"? <Search/> : (
+          ) : page === "search" ? (
+            <Search />
+          ) : (
             <Settings />
           )}
         </div>
-
+        {/* const [fileoption,setfileoption] = ({isvisible:false,selectedtype:0,rby:0,rbx:0}); */}
         <button
-          onClick={() => setShowUploadPopup(true)}
+          onClick={() => {
+            setfileoption((prev) => ({
+              ...prev,
+              isvisible: true,
+            }));
+          }}
           id="document-adding-btn"
           title="Add Document"
         >
@@ -329,7 +418,7 @@ const Dashboard = () => {
                 <input
                   type="text"
                   name="fileName"
-                  value={uploadData.fileName?.split(".")[0]}
+                  value={uploadData.fileName}
                   onChange={handleInputChange}
                   placeholder="Enter file name"
                   required
@@ -351,15 +440,17 @@ const Dashboard = () => {
                 <label className="file-upload-label">
                   <input
                     type="file"
+                   multiple={fileoption.state === 1} 
+                   webkitdirectory={fileoption.state === 2 ? "true" : undefined}
                     onChange={handleFileChange}
                     className="file-input"
                   />
                   <div className="file-upload-box">
-                    {uploadData.file ? (
+                    {uploadData.files[0] ? (
                       <>
                         <FaFileAlt className="file-icon" />
                         <span className="file-name">
-                          {uploadData.file.name}
+                          {uploadData.files[0].name}
                         </span>
                       </>
                     ) : (
@@ -375,7 +466,7 @@ const Dashboard = () => {
               <div className="share-section">
                 <span>
                   <input
-                  checked={uploadData.isPublic}
+                    checked={uploadData.isPublic}
                     onChange={(e) =>
                       setUploadData((prev) => ({
                         ...prev,
@@ -445,9 +536,10 @@ const Dashboard = () => {
               <button
                 className="upload-now-btn"
                 onClick={handleUpload}
-               disabled={!uploadData.file || isuploading}
+                disabled={!uploadData.files[0] || isuploading}
               >
-                <FaUpload />{isuploading?`Uploading ... (${line.value}%)`:"Upload Now"}
+                <FaUpload />
+                {isuploading ? `Uploading ... (${line.value}%)` : "Upload Now"}
               </button>
             </div>
           </div>
