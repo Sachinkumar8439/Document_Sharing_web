@@ -26,7 +26,7 @@ import Documents from "../components/Documents";
 import Settings, { bytesToMB } from "../components/Settings";
 import { useAppState } from "../Context/AppStateContext";
 import { initStorageSystem, listFilesForUser } from "../configs/appwriteconfig";
-import { checkfile } from "../utility/util";
+import { checkfile, hashPassword } from "../utility/util";
 import { appwriteAuth, finduser } from "../Auth/appwriteauth";
 import { useAuthState } from "../Context/Authcontext";
 import Search from "../components/Search";
@@ -152,16 +152,27 @@ const Dashboard = () => {
 
   const handleUpload = async () => {
     if (isuploading) return;
+    
+    if (!uploadData.files?.length) {
+      showToast.error("No file selected");
+      return;
+    }
+    
+    if (uploadData.fileName.trim() === "") {
+      showToast.error("File name should not be empty");
+      return;
+    }
 
-  if (!uploadData.files?.length) {
-    showToast.error("No file selected");
-    return;
-  }
+    let password = uploadData.filePassword;
+    if(password.length!==0){
 
-  if (uploadData.fileName.trim() === "") {
-    showToast.error("File name should not be empty");
-    return;
-  }
+      if ( password.length > 3) {
+        password = await hashPassword(password);
+      }else{
+        showToast.error("file password should be largen then 3 words");
+        return
+      }
+    }
 
   setisuploading(true);
 
@@ -185,9 +196,6 @@ const Dashboard = () => {
     }
 
     let fileToUpload = finalFile;
-    if (uploadData.filePassword.length > 3) {
-      fileToUpload = await encryptFileWithPassword(finalFile, uploadData.filePassword);
-    }
 
     if (fileToUpload.size < 5242880) await setline(70);
       const response = await uploadFileForUser(

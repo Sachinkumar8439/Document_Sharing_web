@@ -57,7 +57,7 @@ const Profile = () => {
       },null,true);
       if (res.success) {
         await setline(75);
-        if(image?.split("FILEID")[1].length!==0){
+        if(image  && image?.split("FILEID")[1].length!==0){
           const da = await deleteFileForUser(image.split("FILEID")[1],true)
 
         }

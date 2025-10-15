@@ -20,7 +20,7 @@ const Hero = ({ onSignIn, onSignUp }) => {
         <div className="hero-content">
           <div className="hero-badge">
             <Shield size={16} />
-            <span>Aadhaar-Linked Security</span>
+            <span>High Security</span>
           </div>
           
           <h1 className="hero-heading">
@@ -41,7 +41,7 @@ const Hero = ({ onSignIn, onSignUp }) => {
             </div>
             <div className="feature-item">
               <Shield size={20} />
-              <span>Bank-Level Security</span>
+              <span>High-Level Security</span>
             </div>
             <div className="feature-item">
               <Zap size={20} />
